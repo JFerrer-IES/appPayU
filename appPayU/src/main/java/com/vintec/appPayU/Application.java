@@ -1,5 +1,4 @@
 package com.vintec.appPayU;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -17,25 +16,29 @@ public class Application {
 	}
 
 	@Bean
-	public CommandLineRunner demo(ProductoRepository productRepository) {
-
+	public CommandLineRunner demo(UsuarioRepository urepository, ProductosRepository prepository, OrdenRepository orepository) {
 		return (args) -> {
+			Usuario us= new Usuario("Eduardo", "López","23/02/1996","eduardo_zamu@hotmail.com","d","Romulo","CDMX","MX","07800");
+			urepository.save( us);
+			Productos pr=new Productos("ProductoA","ProductoA Descripción", "55");
+			prepository.save(pr);
+			orepository.save(new Orden(us,"Referencia", "Firma",pr,"55"));
 			
-			// guardamos unos cuantos productos
-			productRepository.save(new Producto("Moto E5 ","Smartphone Motorola Moto E5 16 GB dorado AT&T","3699"));
-			productRepository.save(new Producto("IPad Mini 4","IPad Apple Mini 4 128 Gb gris oscuro","9899"));
-			productRepository.save(new Producto("Pantalla Samsung 4K 50 pulgadas","Pantalla Samsung Ultra HD 50 Pulgadas UN50MU6103FXZX","10999"));
-			
-			// realizamos una busqueda de todos los productos
-			log.info("");
-			log.info("Productos encontrados con findAll():");
-			log.info("-------------------------------");
-			for (Producto producto : productRepository.findAll()) {
-				log.info(producto.toString());
-			}
-			log.info("");
-					
-		}; //Aqui acaba el return (args)
-	} // Termina bean 
 
-}  
+			// fetch all customers
+			log.info("Customers found with findAll():");
+			log.info("-------------------------------");
+			log.info("Muestra todos los clinetes");
+			for (Usuario usuario : urepository.findAll()) {
+				log.info(usuario.toString());
+			}
+			for (Productos productos : prepository.findAll()) {
+				log.info(productos.toString());
+			}
+			for (Orden orden: orepository.findAll()) {
+				log.info(orden.toString());
+			}
+			
+		};
+	}
+}
