@@ -17,6 +17,7 @@ public class Usuario{
     private String lastName;
     private String birthdate;
     private String emailAddress;
+    private String phone;
     private String dniNumber;
     private String street1;
     private String city;
@@ -85,13 +86,20 @@ public class Usuario{
 	public void setPostalCode(String postalCode) {
 		this.postalCode = postalCode;
 	}
+	public String getPhone() {
+		return phone;
+	}
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
 	
-	public Usuario(String name, String lastName, String birthdate, String emailAddress, String dniNumber,
+	public Usuario(String name, String lastName, String birthdate, String emailAddress, String phone, String dniNumber,
 			String street1, String city, String contry, String postalCode) {
 		this.name = name;
 		this.lastName = lastName;
 		this.birthdate = birthdate;
 		this.emailAddress = emailAddress;
+		this.phone = phone;
 		this.dniNumber = dniNumber;
 		this.street1 = street1;
 		this.city = city;
@@ -102,7 +110,7 @@ public class Usuario{
 	@Override
 	public String toString() {
 		return "Usuario [id=" + id + ", Name=" + name + ", LastName=" + lastName + ", birthdate=" + birthdate
-				+ ", emailAddress=" + emailAddress + ", dniNumber=" + dniNumber + ", street1=" + street1 + ", city="
+				+ ", emailAddress=" + emailAddress + ", phone=" + phone + ", dniNumber=" + dniNumber + ", street1=" + street1 + ", city="
 				+ city + ", contry=" + contry + ", postalCode=" + postalCode + "]";
 	}
 

@@ -27,9 +27,9 @@ public class Application {
 			productRepository.save(new Producto("Pantalla Samsung 4K 50 pulgadas","Pantalla Samsung Ultra HD 50 Pulgadas UN50MU6103FXZX","10999"));
 			
 			// guardamos unos cuantos usuarios
-			usuarioRepository.save(new Usuario("Eduardo", "López","23/02/1996","eduardo_zamu@hotmail.com","d","Romulo","CDMX","MX","07800"));
-			usuarioRepository.save(new Usuario("Luis", "López","15/03/1992","luis@hotmail.com","r","Zerman","CDMX","MX","07850"));
-			usuarioRepository.save(new Usuario("Andrea", "Peredo","20/06/1996","andrea@hotmail.com","a","Fundidora","CDMX","MX","07820"));
+			usuarioRepository.save(new Usuario("Eduardo", "López","23/02/1996","eduardo_zamu@hotmail.com", "51135288","d","Romulo","CDMX","MX","07800"));
+			usuarioRepository.save(new Usuario("Luis", "López","15/03/1992","luis@hotmail.com", "52335180","r","Zerman","CDMX","MX","07850"));
+			usuarioRepository.save(new Usuario("Andrea", "Peredo","20/06/1996","andrea@hotmail.com", "55135690", "a","Fundidora","CDMX","MX","07820"));
 			
 			// realizamos una busqueda de todos los usuarios
 			log.info("");

@@ -57,7 +57,7 @@ public class Producto {
 	
 	@Override
 	public String toString() {
-		String salida = String.format("Product[id='%d', name='%s', description='%s', price='%s'], ", id, name_product, description_product, price_product);
+		String salida = String.format("Product[id=%d, name=%s, description=%s, price=%s], ", id, name_product, description_product, price_product);
 //		if(customer != null) {
 //				salida += customer.toString();
 //		}
