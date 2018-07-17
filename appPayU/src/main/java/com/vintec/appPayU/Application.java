@@ -7,11 +7,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
+import com.vintec.appPayU.models.Orden;
 import com.vintec.appPayU.models.Producto;
 import com.vintec.appPayU.models.Usuario;
-import com.vintec.appPayU.models.Orden;
-
-
 import com.vintec.appPayU.repositories.OrdenRepository;
 import com.vintec.appPayU.repositories.ProductoRepository;
 import com.vintec.appPayU.repositories.UsuarioRepository;
@@ -45,50 +43,16 @@ public class Application {
 			ordenRepository.save(new Orden("Referencia 2", "Firma 2", 10.30));
 			ordenRepository.save(new Orden("Referencia 3", "Firma 3", 320.10));
 			
-			//Vamos a asignarle un producto a una orden
-			log.info("");
-			log.info("a la orden 1 le agregamos el moto e5 :");
-			log.info("--------------------------------------------");
-			try {
-				productRepository.findById(1L).ifPresent(product -> {
-					Orden orden = ordenRepository.findById(1L).get();
-					orden.setProducto(product);
-					ordenRepository.save(orden);
-				});
-				log.info("Tarea completada con exito!!");
-				log.info(" ");
-			} catch(Exception ex) {
-				log.info("Registro no encontrado... ");
-				log.info(ex.toString());
-				log.info("");
-			}
+			log.info(" ");
 			
-			//Vamos a asignarle una orden a un usuario
-			log.info("al usuario 1 le agregamos la orden 1 :");
-			log.info("--------------------------------------------");
-			try {
-				ordenRepository.findById(1L).ifPresent(orden -> {
-					Usuario usuario = usuarioRepository.findById(1L).get();
-					usuario.setOrden(orden);
-					usuarioRepository.save(usuario);
-				});
-				log.info("Tarea completada con exito!!");
-				log.info(" ");
-			} catch(Exception ex) {
-				log.info("Registro no encontrado... ");
-				log.info(ex.toString());
-				log.info("");
-			}
-			
-//			//Vamos a asignarle otra orden al usuario 1
-//			log.info("al usuario 1 le agregamos la orden 2 :");
+//			//Vamos a asignarle un producto a una orden
+//			log.info("a la orden 1 le agregamos el moto e5 :");
 //			log.info("--------------------------------------------");
 //			try {
-//				log.info("");
-//				ordenRepository.findById(2L).ifPresent(orden -> {
-//					Usuario usuario = usuarioRepository.findById(1L).get();
-//					usuario.setOrden(orden);
-//					usuarioRepository.save(usuario);
+//				productRepository.findById(1L).ifPresent(product -> {
+//					Orden orden = ordenRepository.findById(1L).get();
+//					orden.setProducto(product);
+//					ordenRepository.save(orden);
 //				});
 //				log.info("Tarea completada con exito!!");
 //				log.info(" ");
@@ -98,12 +62,56 @@ public class Application {
 //				log.info("");
 //			}
 			
+			//Vamos a asignarle una orden a un usuario
+			log.info("al usuario 1 le agregamos la orden 1 :");
+			log.info("--------------------------------------------");
+			try {
+				usuarioRepository.findById(1L).ifPresent(usuario -> {
+					ordenRepository.findById(1L).ifPresent(orden -> {
+						orden.setUsuario(usuario);
+						usuario.getOrdenes().add(orden);
+						usuarioRepository.save(usuario);
+					});
+				});
+				log.info("Tarea completada con exito!!");
+				log.info(" ");
+			} catch(Exception ex) {
+				log.info("Registros no encontrados, error en la operacion... ");
+				log.info(ex.toString());
+				log.info("");
+			}
+			
+			//Vamos a asignarle otra orden al usuario 1
+			log.info("al usuario 1 le agregamos la orden 2 :");
+			log.info("--------------------------------------------");
+			try {
+				usuarioRepository.findById(1L).ifPresent(usuario -> {
+					ordenRepository.findById(2L).ifPresent(orden -> {
+						orden.setUsuario(usuario);
+						usuario.getOrdenes().add(orden);
+						usuarioRepository.save(usuario);
+					});
+				});
+				log.info("Tarea completada con exito!!");
+				log.info(" ");
+			} catch(Exception ex) {
+				log.info("Registros no encontrados, error en la operacion... ");
+				log.info(ex.toString());
+				log.info("");
+			}
+			
 			// realizamos una busqueda de todos los usuarios
 			log.info("");
 			log.info("Usuarios");
 			log.info("-------------------------------");
 			for (Usuario usuario : usuarioRepository.findAll()) {
 				log.info(usuario.toString());
+				if(usuario.getOrdenes() != null) {
+					usuario.getOrdenes().stream().forEach(orden -> {
+							log.info(orden.toString());
+						});
+					log.info(" ");
+				}
 			}
 			// realizamos una busqueda de todos los productos
 			log.info("");
@@ -118,6 +126,10 @@ public class Application {
 			log.info("-------------------------------");
 			for (Orden orden : ordenRepository.findAll()) {
 				log.info(orden.toString());
+				if(orden.getUsuario() != null) {
+					log.info(orden.getUsuario().toString());
+					log.info(" ");
+				}
 			}
 			log.info("");
 			

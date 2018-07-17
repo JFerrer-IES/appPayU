@@ -1,22 +1,22 @@
 package com.vintec.appPayU.models;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "usuarios")
 public class Usuario{
-
+	
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
@@ -51,10 +51,9 @@ public class Usuario{
     @Column
     private String postalCode;
     
-    @ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "orden_id")
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	private Orden orden;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "usuario")
+	private Set<Orden> ordenes = new HashSet<>();
+    
     
     protected Usuario() {} 
 
@@ -146,12 +145,12 @@ public class Usuario{
 		this.phone = phone;
 	}
 	
-	public Orden getOrden() {
-		return orden;
+	public Set<Orden> getOrdenes() {
+		return ordenes;
 	}
 	
-	public void setOrden(Orden orden) {
-		this.orden = orden;
+	public void setOrdenes(Set<Orden> ordenes) {
+		this.ordenes = ordenes;
 	}
 	
 	public Usuario(String name, String lastName, String birthdate, String emailAddress, String phone, String dniNumber,
@@ -169,7 +168,7 @@ public class Usuario{
 	}
 	
 	public Usuario(String name, String lastName, String birthdate, String emailAddress, String phone, String dniNumber,
-			String street1, String city, String contry, String postalCode, Orden orden) {
+			String street1, String city, String contry, String postalCode, Set<Orden> ordenes) {
 		this.name = name;
 		this.lastName = lastName;
 		this.birthdate = birthdate;
@@ -180,7 +179,7 @@ public class Usuario{
 		this.city = city;
 		this.contry = contry;
 		this.postalCode = postalCode;
-		this.orden = orden;
+		this.ordenes = ordenes;
 	}
 
 	@Override
@@ -188,9 +187,6 @@ public class Usuario{
 		String salida =  "Usuario [id=" + id + ", Name=" + name + ", LastName=" + lastName + ", birthdate=" + birthdate
 				+ ", emailAddress=" + emailAddress + ", phone=" + phone + ", dniNumber=" + dniNumber + ", street1=" + street1 + ", city="
 				+ city + ", contry=" + contry + ", postalCode=" + postalCode + "]; ";
-		if(orden != null) {
-			salida += orden.toString();
-		}
 		return salida;
 	}
 

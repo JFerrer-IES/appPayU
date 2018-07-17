@@ -10,9 +10,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
 @Entity
 @Table(name = "ordenes")
 public class Orden {
@@ -31,9 +28,8 @@ public class Orden {
 	private double total;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "producto_id")
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	private Producto producto;
+	@JoinColumn(name = "usuario_id")
+	private Usuario usuario;
 
 	public Long getId() {
 		return id;
@@ -67,12 +63,12 @@ public class Orden {
 		this.total = total;
 	}
 	
-	public Producto getProducto() {
-		return producto;
+	public Usuario getUsuario() {
+		return usuario;
 	}
 	
-	public void setProducto(Producto producto) {
-		this.producto = producto;
+	public void setUsuario(Usuario usuario) {
+		this.usuario = usuario;
 	}
 	
 	public Orden(String referencia, String firma, double total) {
@@ -81,11 +77,11 @@ public class Orden {
 		this.total = total;
 	}
 	
-	public Orden(String referencia, String firma, double total, Producto producto) {
+	public Orden(String referencia, String firma, double total, Usuario usuario) {
 		this.firma = firma;
 		this.referencia = referencia;
 		this.total = total;
-		this.producto = producto;
+		this.usuario = usuario;
 	}
 	
 	public Orden() {}
@@ -93,9 +89,6 @@ public class Orden {
 	@Override
 	public String toString() {
 		String salida = "Orden [id=" + id + ", referencia=" + referencia + ", firma=" + firma + ", total=" + total + "]; ";
-		if(producto != null) {
-			salida += producto.toString();
-		}
 		return salida;
     }
 }
