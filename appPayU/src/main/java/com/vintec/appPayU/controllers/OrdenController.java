@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.vintec.appPayU.exceptions.ResourceNotFoundException;
 import com.vintec.appPayU.models.Orden;
 import com.vintec.appPayU.repositories.OrdenRepository;
 import com.vintec.appPayU.repositories.UsuarioRepository;
 
-import exceptions.ResourceNotFoundException;
 
 @RestController
 public class OrdenController {
