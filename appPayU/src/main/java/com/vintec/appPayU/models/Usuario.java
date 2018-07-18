@@ -49,6 +49,10 @@ public class Usuario{
     private String contry;
     
     @Column
+    private String state;
+    
+    
+    @Column
     private String postalCode;
     
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "usuario")
@@ -121,6 +125,14 @@ public class Usuario{
 		this.city = city;
 	}
 	
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
+	}
+
 	public String getContry() {
 		return contry;
 	}
@@ -154,7 +166,7 @@ public class Usuario{
 	}
 	
 	public Usuario(String name, String lastName, String birthdate, String emailAddress, String phone, String dniNumber,
-			String street1, String city, String contry, String postalCode) {
+			String street1, String city,String state ,String contry, String postalCode) {
 		this.name = name;
 		this.lastName = lastName;
 		this.birthdate = birthdate;
@@ -163,12 +175,13 @@ public class Usuario{
 		this.dniNumber = dniNumber;
 		this.street1 = street1;
 		this.city = city;
+		this.state=state;
 		this.contry = contry;
 		this.postalCode = postalCode;
 	}
 	
 	public Usuario(String name, String lastName, String birthdate, String emailAddress, String phone, String dniNumber,
-			String street1, String city, String contry, String postalCode, Set<Orden> ordenes) {
+			String street1, String city, String contry,String state, String postalCode, Set<Orden> ordenes) {
 		this.name = name;
 		this.lastName = lastName;
 		this.birthdate = birthdate;
@@ -177,16 +190,33 @@ public class Usuario{
 		this.dniNumber = dniNumber;
 		this.street1 = street1;
 		this.city = city;
+		this.state=state;
 		this.contry = contry;
 		this.postalCode = postalCode;
 		this.ordenes = ordenes;
+	}
+	public String toJasonShipping()
+	{
+		
+		return "\"shippingAddress\": {\"street1\":\""+street1+"\",\"city\":\""+city+"\",\"state\": \""+state+"\",\"country\":\""+contry+"\",\"postalCode\":\""+postalCode+"\",\"phone\":\""+phone+"\"}";	
+		//postalCode and phone
+	}
+	public String toJasonBuyer()
+	{
+		
+		return "\"buyer\": {\"fullName\":\""+name+" "+lastName+"\",\"emailAddress\":\""+emailAddress+"\",\"contactPhone\":\""+phone+"\",\"dniNumber\":\""+dniNumber+"\",\"shippingAddress\": {\"street1\":\""+street1+"\",\"city\":\""+city+"\",\"country\":\""+contry+"\"}},";	
+	}
+	public String toJasonPayer()
+	{
+		
+		return "\"payer\": {\"fullName\":\""+name+" "+lastName+"\",\"emailAddress\":\""+emailAddress+"\", \"birthdate\": \""+birthdate+"\",\"contactPhone\":\""+phone+"\",\"dniNumber\":\""+dniNumber+"\",\"billingAddress\": {\"street1\":\""+street1+"\",\"city\":\""+city+"\",\"country\":\""+contry+"\",\"postalCode\":\""+postalCode+"\"}},";	
 	}
 
 	@Override
 	public String toString() {
 		String salida =  "Usuario [id=" + id + ", Name=" + name + ", LastName=" + lastName + ", birthdate=" + birthdate
 				+ ", emailAddress=" + emailAddress + ", phone=" + phone + ", dniNumber=" + dniNumber + ", street1=" + street1 + ", city="
-				+ city + ", contry=" + contry + ", postalCode=" + postalCode + "]; ";
+				+ city + ", state=" + state + ", contry=" + contry + ", postalCode=" + postalCode + "]; ";
 		return salida;
 	}
 

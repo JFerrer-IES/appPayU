@@ -2,9 +2,12 @@ package com.vintec.appPayU.models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -24,9 +27,9 @@ public class Producto {
 	@Column
 	private String price_product;
 	
-//    @ManyToOne(fetch = FetchType.EAGER)
-//	@JoinColumn(name = "orden_id")
-//	private Orden orden;
+    @ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "orden_id")
+	private Orden orden;
 
 	public Long getId() {
 		return id;
@@ -60,13 +63,13 @@ public class Producto {
 		this.price_product = price_product;
 	}
 	
-//	public Orden getOrden() {
-//		return orden;
-//	}
-//	
-//	public void setOrden(Orden orden) {
-//		this.orden = orden;
-//	}
+	public Orden getOrden() {
+		return orden;
+	}
+	
+	public void setOrden(Orden orden) {
+		this.orden = orden;
+	}
 	
 	protected Producto() {}
 	
@@ -76,12 +79,12 @@ public class Producto {
 		this.price_product = price_product;
 	}
 	
-//	public Producto(String name_product, String description_product, String price_product, Orden orden) {
-//		this.name_product = name_product;
-//		this.description_product = description_product;
-//		this.price_product = price_product;
-//		this.orden = orden;
-//	}
+	public Producto(String name_product, String description_product, String price_product, Orden orden) {
+		this.name_product = name_product;
+		this.description_product = description_product;
+		this.price_product = price_product;
+		this.orden = orden;
+	}
 	
 	@Override
 	public String toString() {
