@@ -22,11 +22,7 @@ public class Producto {
 	private String description_product;
 	
 	@Column
-	private String price_product;
-	
-//    @ManyToOne(fetch = FetchType.EAGER)
-//	@JoinColumn(name = "orden_id")
-//	private Orden orden;
+	private double price_product;
 
 	public Long getId() {
 		return id;
@@ -44,7 +40,7 @@ public class Producto {
 		return name_product;
 	}
 	
-	public String getPrice_product() {
+	public double getPrice_product() {
 		return price_product;
 	}
 	
@@ -56,32 +52,17 @@ public class Producto {
 		this.name_product = name_product;
 	}
 	
-	public void setPrice_product(String price_product) {
+	public void setPrice_product(double price_product) {
 		this.price_product = price_product;
 	}
 	
-//	public Orden getOrden() {
-//		return orden;
-//	}
-//	
-//	public void setOrden(Orden orden) {
-//		this.orden = orden;
-//	}
-	
 	protected Producto() {}
 	
-	public Producto(String name_product, String description_product, String price_product) {
+	public Producto(String name_product, String description_product, double price_product) {
 		this.name_product = name_product;
 		this.description_product = description_product;
 		this.price_product = price_product;
 	}
-	
-//	public Producto(String name_product, String description_product, String price_product, Orden orden) {
-//		this.name_product = name_product;
-//		this.description_product = description_product;
-//		this.price_product = price_product;
-//		this.orden = orden;
-//	}
 	
 	@Override
 	public String toString() {

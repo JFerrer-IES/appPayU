@@ -29,23 +29,23 @@ public class Application {
 
 		return (args) -> {
 			// guardamos unos cuantos usuarios
-			usuarioRepository.save(new Usuario("Eduardo", "López","23/02/1996","eduardo_zamu@hotmail.com", "51135288","d","Romulo","CDMX","MX","07800"));
-			usuarioRepository.save(new Usuario("Luis", "López","15/03/1992","luis@hotmail.com", "52335180","r","Zerman","CDMX","MX","07850"));
-			usuarioRepository.save(new Usuario("Andrea", "Peredo","20/06/1996","andrea@hotmail.com", "55135690", "a","Fundidora","CDMX","MX","07820"));
+			usuarioRepository.save(new Usuario("Eduardo", "López","1996-02-13","eduardo_zamu@hotmail.com", "51135288","d","Romulo","CDMX","MX","07800"));
+			usuarioRepository.save(new Usuario("Luis", "López","1992-03-15","luis@hotmail.com", "52335180","r","Zerman","CDMX","MX","07850"));
+			usuarioRepository.save(new Usuario("Andrea", "Peredo","1996-06-20","andrea@hotmail.com", "55135690", "a","Fundidora","CDMX","MX","07820"));
 			
 			// guardamos unos cuantos productos
-			productoRepository.save(new Producto("Moto E5 ","Smartphone Motorola Moto E5 16 GB dorado AT&T","3699"));
-			productoRepository.save(new Producto("IPad Mini 4","IPad Apple Mini 4 128 Gb gris oscuro","9899"));
-			productoRepository.save(new Producto("Pantalla Samsung 4K 50 pulgadas","Pantalla Samsung Ultra HD 50 Pulgadas UN50MU6103FXZX","10999"));
+			productoRepository.save(new Producto("Moto E5 ","Smartphone Motorola Moto E5 16 GB dorado AT&T",3699));
+			productoRepository.save(new Producto("IPad Mini 4","IPad Apple Mini 4 128 Gb gris oscuro",9899));
+			productoRepository.save(new Producto("Pantalla Samsung 4K 50 pulgadas","Pantalla Samsung Ultra HD 50 Pulgadas UN50MU6103FXZX",10999));
 			
 			// guardamos unas cuantas ordenes
-			ordenRepository.save(new Orden("Referencia 1", "Firma 1", 150.80));
-			ordenRepository.save(new Orden("Referencia 2", "Firma 2", 10.30));
-			ordenRepository.save(new Orden("Referencia 3", "Firma 3", 320.10));
+			ordenRepository.save(new Orden("Referencia 1", "Firma 1", "150.80"));
+			ordenRepository.save(new Orden("Referencia 2", "Firma 2", "10.30"));
+			ordenRepository.save(new Orden("Referencia 3", "Firma 3", "320.10"));
 			
 			log.info(" ");
 			
-			//Vamos a asignarle una orden a un usuario
+			//Vamos a asignarle una orden con dos productos a un usuario
 			log.info("al usuario 1 le agregamos la orden 1 :");
 			log.info("--------------------------------------------");
 			try {
@@ -56,8 +56,11 @@ public class Application {
 						usuarioRepository.save(usuario);
 						productoRepository.findById(1L).ifPresent(producto -> {
 							orden.getProductos().add(producto);
-							ordenRepository.save(orden);
 						});
+						productoRepository.findById(2L).ifPresent(producto -> {
+							orden.getProductos().add(producto);
+						});
+						ordenRepository.save(orden);
 					});
 				});
 				log.info("Tarea completada con exito!!");
@@ -121,7 +124,6 @@ public class Application {
 				}
 			}
 			log.info("");
-			
 					
 		}; //Aqui acaba el return (args)
 	} // Termina bean 

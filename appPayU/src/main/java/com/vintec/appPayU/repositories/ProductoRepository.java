@@ -8,5 +8,4 @@ import com.vintec.appPayU.models.Producto;
 @Repository
 public interface ProductoRepository extends CrudRepository<Producto, Long>{
 
-//	Page<Producto> findByOrdenId (Long ordenId, Pageable pageable);
 }

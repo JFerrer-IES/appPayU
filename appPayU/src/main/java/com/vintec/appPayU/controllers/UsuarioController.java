@@ -3,14 +3,13 @@ package com.vintec.appPayU.controllers;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vintec.appPayU.models.Usuario;
@@ -22,13 +21,18 @@ public class UsuarioController {
 	@Autowired
 	UsuarioRepository usuarioRepository;
 	
-	@GetMapping("/usuarios")
-	public Page<Usuario> getAllUsuarios(Pageable pageable){
-		return usuarioRepository.findAll(pageable);
+	@GetMapping("/usuarios_json")
+	public Iterable<Usuario> getAllUsuarios(){
+		return usuarioRepository.findAll();
+	}
+	
+	@GetMapping("/usuarios/{usuarioId}")
+	public Usuario searchUsuario(@PathVariable (value = "usuarioId") Long usuarioId){
+		return usuarioRepository.findById(usuarioId).get();
 	}
 	
 	@PostMapping("/usuarios")
-	public Usuario createPost(@Valid @RequestBody Usuario usuario){
+	public Usuario createUsuario(@Valid @RequestBody Usuario usuario){
 		return usuarioRepository.save(usuario);
 	}
 	
@@ -54,7 +58,8 @@ public class UsuarioController {
 		return usuarioRepository.findById(usuarioId).get();
     }
 	
-	@DeleteMapping("/usuarios/{usuarioId}")
+	@DeleteMapping(path = "/usuarios/{usuarioId}", produces = "text/plain")
+	@ResponseBody
     public String deleteUsuario(@PathVariable Long usuarioId) {
         usuarioRepository.findById(usuarioId).ifPresent(usuario -> {
             usuarioRepository.delete(usuario);

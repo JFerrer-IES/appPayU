@@ -15,6 +15,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "ordenes")
 public class Orden {
@@ -30,10 +32,11 @@ public class Orden {
 	private String firma;
 	
 	@Column
-	private double total;
+	private String total;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "usuario_id")
+	@JsonIgnore
 	private Usuario usuario;
 	
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -63,11 +66,11 @@ public class Orden {
 		this.firma = firma;
 	}
 
-	public double getTotal() {
+	public String getTotal() {
 		return total;
 	}
 
-	public void setTotal(double total) {
+	public void setTotal(String total) {
 		this.total = total;
 	}
 	
@@ -87,16 +90,15 @@ public class Orden {
 		this.productos = productos;
 	}
 	
-	public Orden(String referencia, String firma, double total) {
+	public Orden(String referencia, String firma, String total) {
 		this.firma = firma;
 		this.referencia = referencia;
 		this.total = total;
 	}
 	
-	public Orden(String referencia, String firma, double total, Usuario usuario, Set<Producto> productos) {
+	public Orden(String referencia, String firma, Usuario usuario, Set<Producto> productos) {
 		this.firma = firma;
 		this.referencia = referencia;
-		this.total = total;
 		this.usuario = usuario;
 		this.productos = productos;
 	}
@@ -105,6 +107,11 @@ public class Orden {
 	
 	@Override
 	public String toString() {
+		double subtotal = 0;
+		for (Producto producto : productos) {
+			  subtotal += producto.getPrice_product();
+			}
+		this.total = String.valueOf(subtotal);
 		String salida = "Orden [id=" + id + ", referencia=" + referencia + ", firma=" + firma + ", total=" + total + "]; ";
 		return salida;
     }

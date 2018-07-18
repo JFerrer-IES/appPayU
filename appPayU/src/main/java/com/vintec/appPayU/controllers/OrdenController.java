@@ -3,8 +3,6 @@ package com.vintec.appPayU.controllers;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,9 +26,20 @@ public class OrdenController {
 	@Autowired
 	UsuarioRepository usuarioRepository;
 	
-	@GetMapping("/usuarios/{usuarioId}/ordenes")
-    public Page<Orden> getAllOrdenesByUsuarioId(@PathVariable (value = "usuarioId") Long usuarioId, Pageable pageable) {
-        return ordenRepository.findByUsuarioId(usuarioId, pageable);
+	
+	@GetMapping("/ordenes_json")
+	public Iterable<Orden> getAllOrdenes() {
+      return ordenRepository.findAll();
+	}
+	
+	@GetMapping("/ordenes/{ordenId}")
+	public Orden searchOrden(@PathVariable (value = "ordenId") Long ordenId){
+		return ordenRepository.findById(ordenId).get();
+	}
+	
+	@GetMapping("/usuarios/{usuarioId}/ordenes_json")
+    public Iterable<Orden> getAllOrdenesByUsuarioId(@PathVariable (value = "usuarioId") Long usuarioId) {
+        return ordenRepository.findByUsuarioId(usuarioId);
     }
 	
 	@PostMapping("/usuarios/{usuarioId}/ordenes")
@@ -48,13 +57,14 @@ public class OrdenController {
         if(!usuarioRepository.existsById(usuarioId)) {
             throw new ResourceNotFoundException("UsuarioId " + usuarioId + " no encontrado");
         }
-        
-        ordenRepository.findById(ordenId).ifPresent(orden -> {
-            orden.setReferencia(ordenRequest.getReferencia());
-            orden.setFirma(ordenRequest.getFirma());
-            orden.setTotal(ordenRequest.getTotal());
-            ordenRepository.save(orden);
-        });
+        else {
+	        ordenRepository.findById(ordenId).ifPresent(orden -> {
+	            orden.setReferencia(ordenRequest.getReferencia());
+	            orden.setFirma(ordenRequest.getFirma());
+	            orden.setTotal(ordenRequest.getTotal());
+	            ordenRepository.save(orden);
+	        });
+        }
         return ordenRepository.findById(ordenId).get();
     }
 	
