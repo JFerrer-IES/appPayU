@@ -25,7 +25,7 @@ public class Application {
 	}
 
 	@Bean
-	public CommandLineRunner demo(OrdenRepository ordenRepository, ProductoRepository productRepository, UsuarioRepository usuarioRepository) {
+	public CommandLineRunner demo(OrdenRepository ordenRepository, ProductoRepository productoRepository, UsuarioRepository usuarioRepository) {
 
 		return (args) -> {
 			// guardamos unos cuantos usuarios
@@ -34,9 +34,9 @@ public class Application {
 			usuarioRepository.save(new Usuario("Andrea", "Peredo","20/06/1996","andrea@hotmail.com", "55135690", "a","Fundidora","CDMX","MX","07820"));
 			
 			// guardamos unos cuantos productos
-			productRepository.save(new Producto("Moto E5 ","Smartphone Motorola Moto E5 16 GB dorado AT&T","3699"));
-			productRepository.save(new Producto("IPad Mini 4","IPad Apple Mini 4 128 Gb gris oscuro","9899"));
-			productRepository.save(new Producto("Pantalla Samsung 4K 50 pulgadas","Pantalla Samsung Ultra HD 50 Pulgadas UN50MU6103FXZX","10999"));
+			productoRepository.save(new Producto("Moto E5 ","Smartphone Motorola Moto E5 16 GB dorado AT&T","3699"));
+			productoRepository.save(new Producto("IPad Mini 4","IPad Apple Mini 4 128 Gb gris oscuro","9899"));
+			productoRepository.save(new Producto("Pantalla Samsung 4K 50 pulgadas","Pantalla Samsung Ultra HD 50 Pulgadas UN50MU6103FXZX","10999"));
 			
 			// guardamos unas cuantas ordenes
 			ordenRepository.save(new Orden("Referencia 1", "Firma 1", 150.80));
@@ -44,23 +44,6 @@ public class Application {
 			ordenRepository.save(new Orden("Referencia 3", "Firma 3", 320.10));
 			
 			log.info(" ");
-			
-//			//Vamos a asignarle un producto a una orden
-//			log.info("a la orden 1 le agregamos el moto e5 :");
-//			log.info("--------------------------------------------");
-//			try {
-//				productRepository.findById(1L).ifPresent(product -> {
-//					Orden orden = ordenRepository.findById(1L).get();
-//					orden.setProducto(product);
-//					ordenRepository.save(orden);
-//				});
-//				log.info("Tarea completada con exito!!");
-//				log.info(" ");
-//			} catch(Exception ex) {
-//				log.info("Registro no encontrado... ");
-//				log.info(ex.toString());
-//				log.info("");
-//			}
 			
 			//Vamos a asignarle una orden a un usuario
 			log.info("al usuario 1 le agregamos la orden 1 :");
@@ -71,6 +54,10 @@ public class Application {
 						orden.setUsuario(usuario);
 						usuario.getOrdenes().add(orden);
 						usuarioRepository.save(usuario);
+						productoRepository.findById(1L).ifPresent(producto -> {
+							orden.getProductos().add(producto);
+							ordenRepository.save(orden);
+						});
 					});
 				});
 				log.info("Tarea completada con exito!!");
@@ -109,6 +96,7 @@ public class Application {
 				if(usuario.getOrdenes() != null) {
 					usuario.getOrdenes().stream().forEach(orden -> {
 							log.info(orden.toString());
+							orden.getProductos().stream().forEach(producto -> log.info(producto.toString()));
 						});
 					log.info(" ");
 				}
@@ -117,7 +105,7 @@ public class Application {
 			log.info("");
 			log.info("Productos");
 			log.info("-------------------------------");
-			for (Producto producto : productRepository.findAll()) {
+			for (Producto producto : productoRepository.findAll()) {
 				log.info(producto.toString());
 			}
 			// realizamos una busqueda de todas las ordenes
@@ -128,6 +116,7 @@ public class Application {
 				log.info(orden.toString());
 				if(orden.getUsuario() != null) {
 					log.info(orden.getUsuario().toString());
+					orden.getProductos().stream().forEach(producto -> log.info(producto.toString()));
 					log.info(" ");
 				}
 			}

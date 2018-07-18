@@ -1,5 +1,9 @@
 package com.vintec.appPayU.models;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -8,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -30,6 +35,9 @@ public class Orden {
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "usuario_id")
 	private Usuario usuario;
+	
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	private Set<Producto> productos = new HashSet<>();
 
 	public Long getId() {
 		return id;
@@ -71,17 +79,26 @@ public class Orden {
 		this.usuario = usuario;
 	}
 	
+	public Set<Producto> getProductos() {
+		return productos;
+	}
+	
+	public void setProductos(Set<Producto> productos) {
+		this.productos = productos;
+	}
+	
 	public Orden(String referencia, String firma, double total) {
 		this.firma = firma;
 		this.referencia = referencia;
 		this.total = total;
 	}
 	
-	public Orden(String referencia, String firma, double total, Usuario usuario) {
+	public Orden(String referencia, String firma, double total, Usuario usuario, Set<Producto> productos) {
 		this.firma = firma;
 		this.referencia = referencia;
 		this.total = total;
 		this.usuario = usuario;
+		this.productos = productos;
 	}
 	
 	public Orden() {}
