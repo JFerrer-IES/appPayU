@@ -90,6 +90,11 @@ public class Orden {
 		this.productos = productos;
 	}
 	
+	public Orden(String referencia, String firma) {
+		this.firma = firma;
+		this.referencia = referencia;
+	}
+	
 	public Orden(String referencia, String firma, String total) {
 		this.firma = firma;
 		this.referencia = referencia;

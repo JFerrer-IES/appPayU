@@ -32,7 +32,7 @@ public class ProductoController {
 	}
 	
 	@PostMapping("/productos")
-	public Producto createUsuario(@Valid @RequestBody Producto producto){
+	public Producto createProducto(@Valid @RequestBody Producto producto){
 		return productoRepository.save(producto);
 	}
 	

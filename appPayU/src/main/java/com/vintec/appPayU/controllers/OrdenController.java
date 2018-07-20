@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.vintec.appPayU.exceptions.ResourceNotFoundException;
 import com.vintec.appPayU.models.Orden;
 import com.vintec.appPayU.repositories.OrdenRepository;
+import com.vintec.appPayU.repositories.ProductoRepository;
 import com.vintec.appPayU.repositories.UsuarioRepository;
 
 
@@ -25,6 +26,9 @@ public class OrdenController {
 	
 	@Autowired
 	UsuarioRepository usuarioRepository;
+	
+	@Autowired
+	ProductoRepository productoRepository;
 	
 	
 	@GetMapping("/ordenes_json")
@@ -46,6 +50,17 @@ public class OrdenController {
     public Orden createOrden(@PathVariable (value = "usuarioId") Long usuarioId, @Valid @RequestBody Orden orden) {
         usuarioRepository.findById(usuarioId).ifPresent(usuario -> {
             orden.setUsuario(usuario);
+        });
+        return ordenRepository.save(orden);
+    }
+	
+	@PostMapping("/usuarios/{usuarioId}/ordenes/{productoId}")
+    public Orden createOrdenConProducto(@PathVariable (value = "usuarioId") Long usuarioId, @PathVariable (value = "productoId") Long productoId, @Valid @RequestBody Orden orden) {
+        usuarioRepository.findById(usuarioId).ifPresent(usuario -> {
+            orden.setUsuario(usuario);
+        });
+        productoRepository.findById(productoId).ifPresent(producto -> {
+        	orden.getProductos().add(producto);
         });
         return ordenRepository.save(orden);
     }

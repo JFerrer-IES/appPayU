@@ -1,14 +1,23 @@
 package com.vintec.appPayU;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.client.RestTemplate;
 
+import com.vintec.appPayU.models.CreditCardToken;
+import com.vintec.appPayU.models.Merchant;
 import com.vintec.appPayU.models.Orden;
 import com.vintec.appPayU.models.Producto;
+import com.vintec.appPayU.models.TokenRequest;
+import com.vintec.appPayU.models.TokenResponse;
 import com.vintec.appPayU.models.Usuario;
 import com.vintec.appPayU.repositories.OrdenRepository;
 import com.vintec.appPayU.repositories.ProductoRepository;
@@ -124,6 +133,48 @@ public class Application {
 				}
 			}
 			log.info("");
+			
+			//Vamos a intentar tokenizar
+			log.info("");
+			log.info("Peticion de tokenizar");
+			log.info("-------------------------------");
+			try {
+				CreditCardToken creditCardToken = new CreditCardToken("10", "full name", "32144457", "VISA", "4111111111111111", "2019/01");
+				Merchant merchant = new Merchant();
+				TokenRequest tokenRequest = new TokenRequest(merchant, creditCardToken);
+				log.info(tokenRequest.toJSON());
+				log.info("");
+				
+				//Aqui va la peticion  al servidor PayU
+				HttpHeaders httpHeaders = new HttpHeaders();
+				httpHeaders.set("Content-Type","application/json");
+				httpHeaders.set("Accept","application/json");
+				HttpEntity <String> httpEntity = new HttpEntity <String> (tokenRequest.toJSON(), httpHeaders);
+				RestTemplate restTemplate = new RestTemplate();
+				try {
+					log.info("");
+					log.info("Respuesta de tokenizar");
+					log.info("-------------------------------");
+					TokenResponse tokenResponse = restTemplate.postForObject("https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi", httpEntity, TokenResponse.class);
+					log.info(tokenResponse.toString());
+					log.info("Aqui tiene su token mi estimado: ");
+					log.info(tokenResponse.getCreditCardToken().getCreditCardTokenId());
+					log.info("");
+				}catch(Exception ex){
+					log.info(ex.toString());
+				}
+				//Acaba la peticion al servidor y se desgloso respuesta
+				
+			} catch (Exception ex) {
+				log.info(ex.toString());
+			}
+			log.info("");
+			
+			//Tratando de hacer una lista
+			List<Usuario> usuarios = usuarioRepository.findAll();
+			for(Usuario usuario : usuarios) {
+				log.info(usuario.toString());
+			}
 					
 		}; //Aqui acaba el return (args)
 	} // Termina bean 
