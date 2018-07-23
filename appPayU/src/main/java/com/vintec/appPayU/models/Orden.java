@@ -11,8 +11,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -26,10 +26,10 @@ public class Orden {
     private Long id;
 	
 	@Column
-	private String referencia;
+	private String referencia = "payment_test_99900001";
 	
 	@Column
-	private String firma;
+	private String firma = "69d419f89fb8ed7f80fd7b42bd2ff048";
 	
 	@Column
 	private String total;
@@ -39,9 +39,11 @@ public class Orden {
 	@JsonIgnore
 	private Usuario usuario;
 	
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinColumn
+	@Column(unique = false)
 	private Set<Producto> productos = new HashSet<>();
-
+	
 	public Long getId() {
 		return id;
 	}
@@ -101,6 +103,13 @@ public class Orden {
 		this.total = total;
 	}
 	
+	public Orden(String referencia, String firma, String total, Usuario usuario) {
+		this.firma = firma;
+		this.referencia = referencia;
+		this.total = total;
+		this.usuario = usuario;
+	}
+	
 	public Orden(String referencia, String firma, Usuario usuario, Set<Producto> productos) {
 		this.firma = firma;
 		this.referencia = referencia;
@@ -119,5 +128,9 @@ public class Orden {
 		this.total = String.valueOf(subtotal);
 		String salida = "Orden [id=" + id + ", referencia=" + referencia + ", firma=" + firma + ", total=" + total + "]; ";
 		return salida;
+    }
+	
+	public String toJsonTotal() {
+		return "\"additionalValues\":{ \"TX_VALUE\": { \"value\":"+total+", \"currency\":\"MXN\"}},";
     }
 }

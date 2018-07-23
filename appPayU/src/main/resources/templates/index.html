@@ -143,56 +143,64 @@
     				<div class="col-6">
       					<div class="card">
   							<div class="card-body">
-    							<form action="#" th:action="@{/ordenes}" th:object="${ordenes}" method="POST">
+    							<form action="#" th:action="@{/ordenes}" th:object="${model}" method="POST">
     								<div class="form-group">
     									<label>Usuario:</label>
-    									<select class="form-control" id="usuario-orden" name="usuario-orden" required="true">
-    										<option value="0">Elige un usuario:</option>
-											<option value="1">Eduardo Lopez</option>
-											<option value="2">Luis Lopez</option>
-											<option value="3">Andrea Peredo</option>
-    									</select>
+    									<select class="form-control" id="usuarioId" name="usuarioId">
+   											<option value="">Elige un usuario:</option>
+											<option th:each="usuario : ${usuarios}"
+               									th:value="${usuario.id}"
+               									th:text="${usuario.id}+' -> '+${usuario.name}">
+               								</option>
+                						</select>
     								</div>
     								<div class="form-group">
     									<label>Producto:</label>
-    									<select class="form-control" id="producto-orden" name="producto-orden" required="true">
-    										<option value="0">Elige un producto:</option>
-    										<option value="1">Moto E5</option>
-    										<option value="2">IPad Mini 4</option>
-    										<option value="3">Pantalla Samsung 4K 50 pulgadas</option>
+    									<select class="form-control" id="productoId" name="productoId">
+    											<option value="">Elige un producto:</option>
+												<option th:each="producto : ${productos}"
+                									th:value="${producto.id}"
+                									th:text="${producto.id}+' -> '+${producto.name_product}">
+                								</option>
     									</select>
     								</div>
-    								<div class="form-group">
-    									<label>Cantidad:</label>
-    									<input class="form-control" type="number" min="0" id="cantidad-orden" name="cantidad-orden" required="true">
-    								</div>
-    								<!-- <hr>
-    								<div class="form-group">
-    									<label>Nombre de la tarjeta:</label>
-    									<input class="form-control nombre-tarjeta" type="text">
-    								</div>
-    								<div class="form-group">
-    									<label>Num. tarjeta:</label>
-    									<input class="form-control num-tarjeta" type="number">
-    								</div>
-    								<div class="row">
-    									<div class="col-md-3">
-	    									<div class="form-group">
-			    								<input class="form-control mes-tarjeta" length="2" placeholder="MM" type="number">
+<!--     								<div class="form-group"> -->
+<!--     									<label>Cantidad:</label> -->
+<!--     									<input class="form-control" type="number" min="0" id="cantidad-orden" name="cantidad-orden" required="true"> -->
+<!--     								</div> -->
+    								<hr>
+    								<div th:object="${cc}">	
+	    								<div class="form-group">
+	    									<label>Nombre de la tarjeta:</label>
+	    									<input class="form-control" id="name" name="name" type="text">
+	    								</div>
+	    								<div class="form-group">
+	    									<label>Num. tarjeta:</label>
+	    									<input class="form-control" id="number" name="number" type="number">
+	    								</div>
+	    								<div class="row">
+	    									<div class="col-md-4">
+		    									<div class="form-group">
+		    									<label>Fecha</label>
+				    								<input class="form-control" id="expirationDate" name="expirationDate" placeholder="AAAA/MM" type="text">
+			    								</div>
+		    								</div>
+		    								<div class="col-md-4">
+		    									<div class="form-group">
+			    									<select class="form-control" id="paymentMethod" name="paymentMethod">
+			    										<option value="VISA">VISA</option>
+			    										<option value="MASTERCARD">MASTERCARD</option>
+			    									</select>
+			    								</div>
+		    								</div>
+		    								<div class="col-md-4">
+		    									<div class="form-group">
+			    									<input class="form-control" id="securityCode" name="securityCode" length="3" placeholder="CVC" type="password">
+			    								</div>
 		    								</div>
 	    								</div>
-	    								<div class="col-md-4">
-	    									<div class="form-group">
-		    									<input class="form-control year-tarjeta" length="4" placeholder="AAAA" type="number">
-		    								</div>
-	    								</div>
-	    								<div class="col-md-4">
-	    									<div class="form-group">
-		    									<input class="form-control cvc-tarjeta" length="3" placeholder="CVC" type="password">
-		    								</div>
-	    								</div>
     								</div>
-    								<hr> -->
+    								<hr>
     								<div class="row justify-content-end">
    										<div class="form-group" style="margin-right:10px;">
    											<button type="submit" class="btn btn-success">Comprar</button>
@@ -207,7 +215,7 @@
 				    </div>
 				</div>
   			</div>
-  			<div class="tab-pane fade"id="token" role="tabpanel" aria-labelledby="token-tab">
+  			<div class="tab-pane fade" id="token" role="tabpanel" aria-labelledby="token-tab">
   				<br>
   				<h3 class="text-center">Crear TOKEN</h3>
   				<div class="row justify-content-center">

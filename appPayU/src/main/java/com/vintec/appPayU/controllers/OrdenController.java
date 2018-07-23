@@ -1,14 +1,12 @@
 package com.vintec.appPayU.controllers;
 
-import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vintec.appPayU.exceptions.ResourceNotFoundException;
@@ -47,20 +45,9 @@ public class OrdenController {
     }
 	
 	@PostMapping("/usuarios/{usuarioId}/ordenes")
-    public Orden createOrden(@PathVariable (value = "usuarioId") Long usuarioId, @Valid @RequestBody Orden orden) {
+    public Orden createOrden(@PathVariable (value = "usuarioId") Long usuarioId, @ModelAttribute Orden orden) {
         usuarioRepository.findById(usuarioId).ifPresent(usuario -> {
             orden.setUsuario(usuario);
-        });
-        return ordenRepository.save(orden);
-    }
-	
-	@PostMapping("/usuarios/{usuarioId}/ordenes/{productoId}")
-    public Orden createOrdenConProducto(@PathVariable (value = "usuarioId") Long usuarioId, @PathVariable (value = "productoId") Long productoId, @Valid @RequestBody Orden orden) {
-        usuarioRepository.findById(usuarioId).ifPresent(usuario -> {
-            orden.setUsuario(usuario);
-        });
-        productoRepository.findById(productoId).ifPresent(producto -> {
-        	orden.getProductos().add(producto);
         });
         return ordenRepository.save(orden);
     }
@@ -68,7 +55,7 @@ public class OrdenController {
 	@PutMapping("/usuarios/{usuarioId}/ordenes/{ordenId}")
     public Orden updateOrden(@PathVariable (value = "usuarioId") Long usuarioId,
                                  @PathVariable (value = "ordenId") Long ordenId,
-                                 @Valid @RequestBody Orden ordenRequest) {
+                                 @ModelAttribute Orden ordenRequest) {
         if(!usuarioRepository.existsById(usuarioId)) {
             throw new ResourceNotFoundException("UsuarioId " + usuarioId + " no encontrado");
         }
