@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -57,6 +59,9 @@ public class InicioController {
 	
 	@PostMapping("/ordenes")
     public String createOrdenConProducto(@ModelAttribute ("usuarioId") Long usuarioId, @ModelAttribute ("productoId") Long productoId, @ModelAttribute Orden orden, @ModelAttribute CreditCardRequest cc ) {
+		
+		Logger log = LoggerFactory.getLogger(InicioController.class);
+		
 		usuarioRepository.findById(usuarioId).ifPresent(usuario -> {
         	orden.setUsuario(usuario);
         });
@@ -85,8 +90,16 @@ public class InicioController {
 		httpHeaders.set("Accept", "application/json");
 		HttpEntity<String> httpEntity = new HttpEntity<String>(pago.toJsonPago(), httpHeaders);
 		RestTemplate restTemplate = new RestTemplate();
+		String respuesta = restTemplate.postForObject("https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi", httpEntity, String.class);
 		PagoResponse pagoResponse = restTemplate.postForObject("https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi", httpEntity, PagoResponse.class);
 		//Termina la peticion y da respuesta
+		
+		log.info(" ");
+		log.info("Aqui esta la respuesta del servidor");
+		log.info("---------------------------------------");
+		log.info(respuesta);
+		log.info(pago.toJsonPago());
+		log.info(pagoResponse.toString());
 		
 		if(pagoResponse.getCode().toLowerCase().equals("success")) {
 			return "exito";

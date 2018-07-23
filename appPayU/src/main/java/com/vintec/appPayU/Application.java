@@ -43,8 +43,8 @@ public class Application {
 
 		return (args) -> {
 			// guardamos unos cuantos usuarios
-			usuarioRepository.save(new Usuario("Eduardo", "López","1996-02-13","eduardo_zamu@hotmail.com", "51135288","d","Romulo","CDMX","MX", "MX", "07800"));
-			usuarioRepository.save(new Usuario("Luis", "López","1992-03-15","luis@hotmail.com", "52335180","r","Zerman","CDMX","MX", "MX", "07850"));
+			usuarioRepository.save(new Usuario("Eduardo", "Lopez","1996-02-13","eduardo_zamu@hotmail.com", "51135288","d","Romulo","CDMX","MX", "MX", "07800"));
+			usuarioRepository.save(new Usuario("Luis", "Lopez","1992-03-15","luis@hotmail.com", "52335180","r","Zerman","CDMX","MX", "MX", "07850"));
 			usuarioRepository.save(new Usuario("Andrea", "Peredo","1996-06-20","andrea@hotmail.com", "55135690", "a","Fundidora","CDMX","MX", "MX", "07820"));
 			
 			// guardamos unos cuantos productos

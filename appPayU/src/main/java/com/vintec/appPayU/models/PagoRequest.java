@@ -2,7 +2,6 @@ package com.vintec.appPayU.models;
 
 public class PagoRequest {
 
-	
 	private String lenguage="es";
 	private String command="SUBMIT_TRANSACTION";
 	private MerchantRequest merchant;
