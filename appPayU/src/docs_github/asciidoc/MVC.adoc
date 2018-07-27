@@ -1,0 +1,227 @@
+= Definiendo MVC
+
+En esta guia se explicará como se hace la iteracción entre modelos vistas y controladores (MVC), la estructura del proyecto y como podremos llamar a nuestras vistas.
+
+
+== Controller 
+
+Vamos a generar en la siguiente ruta un controlador _src/main/java/controllers_ el archivo _InicioController.java_, para poder llamar las vistas correspondientes de acuerdo al requerimiento de nuestro sistema.
+
+[source,java]
+----
+package com.vintec.appPayU.controllers;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+
+@Controller
+public class InicioController {
+	
+	@GetMapping("/")
+	public String getIndex() {
+		return "index";
+	}
+	
+}
+----
+
+La annotation `@Controller` indicara a la clase que es de tipo controlador, redireccionara las vistas necesarias, el `@GetMapping` se hará la petición de tipo GET ya que solo mostrará la vista, haremos el método de Index de tipo String que está a su vez retornará la cadena con el nombre de la vista HTML.
+
+
+== Vista
+Vamos a crear nuestras rutas en la siguiente ruta _src/main/resources/templates/index.html_, vamos a generar todo nuestro codigo HTML segun de acuerdo a nuestro requerimiento como el siguiente ejemplo.
+
+[source,html]
+----
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+	<head> 
+	    <title>Bienvenidos</title>
+	    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	</head>
+	<body>
+		<h1>Hola Mundo</h1>
+	</body>
+</html>
+----
+
+Esta es una vista sencilla que solo imprime un Hola Mundo, el tipo de la vista es Thymeleaf, que es una platilla HTML basado en java para Spring Framework.
+
+
+== Modelos
+Los modelos que empleamos en este proyecto son las clases de acuerdo a nuestro ejemplo que es un sistema de compra, en donde necesasitamos Usuarios, Productos y Ordenes, aquí vamos a definir todos los atributos de nuestras clases y las relaciones entre clases, si es de `@OneToOne`, `@OneToMany`, `@ManyToMany`, dependiendo de nuestro sistema, haremos el ejemplo de la clase orden ya que esta se relacionará con las clases de Usuario y Producto.
+
+Crearemos la clase _Orden.java_ en nuestro paquetes de Models que es la siguiente ruta: _src/main/java/models_
+
+[source,java]
+----
+package com.vintec.appPayU.models;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+@Entity
+@Table(name = "ordenes")
+public class Orden {
+	
+	@Id
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    private Long id;
+	
+	@Column
+	private String referencia = "payment_test_99900001";
+	
+	@Column
+	private String firma = "69d419f89fb8ed7f80fd7b42bd2ff048";
+	
+	@Column
+	private String total;
+	
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "usuario_id")
+	@JsonIgnore
+	private Usuario usuario;
+	
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinColumn
+	@Column(unique = false)
+	private Set<Producto> productos = new HashSet<>();
+	
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getReferencia() {
+		return referencia;
+	}
+
+	public void setReferencia(String referencia) {
+		this.referencia = referencia;
+	}
+
+	public String getFirma() {
+		return firma;
+	}
+
+	public void setFirma(String firma) {
+		this.firma = firma;
+	}
+
+	public String getTotal() {
+		return total;
+	}
+
+	public void setTotal(String total) {
+		this.total = total;
+	}
+	
+	public Usuario getUsuario() {
+		return usuario;
+	}
+	
+	public void setUsuario(Usuario usuario) {
+		this.usuario = usuario;
+	}
+	
+	public Set<Producto> getProductos() {
+		return productos;
+	}
+	
+	public void setProductos(Set<Producto> productos) {
+		this.productos = productos;
+	}
+	
+	public Orden(String referencia, String firma) {
+		this.firma = firma;
+		this.referencia = referencia;
+	}
+	
+	public Orden(String referencia, String firma, String total) {
+		this.firma = firma;
+		this.referencia = referencia;
+		this.total = total;
+	}
+	
+	public Orden(String referencia, String firma, String total, Usuario usuario) {
+		this.firma = firma;
+		this.referencia = referencia;
+		this.total = total;
+		this.usuario = usuario;
+	}
+	
+	public Orden(String referencia, String firma, Usuario usuario, Set<Producto> productos) {
+		this.firma = firma;
+		this.referencia = referencia;
+		this.usuario = usuario;
+		this.productos = productos;
+	}
+	
+	public Orden() {}
+	
+	@Override
+	public String toString() {
+		double subtotal = 0;
+		for (Producto producto : productos) {
+			  subtotal += producto.getPrice_product();
+			}
+		this.total = String.valueOf(subtotal);
+		String salida = "Orden [id=" + id + ", referencia=" + referencia + ", firma=" + firma + ", total=" + total + "]; ";
+		return salida;
+    }
+	
+	public String toJsonTotal() {
+		return "\"additionalValues\":{ \"TX_VALUE\": { \"value\":"+total+", \"currency\":\"MXN\"}},";
+    }
+}
+----
+
+Las clases se definen como Entidades con la Anotación `@Entity` así como también la nombraremos con la anotación `Table(name = "ordenes")`, explicaremos las siguientes anotaciones:
+
+|===
+
+| *Annotations* | *Funciones* 
+
+|`@Id`
+|definimos que es la columna de Id de nuestra Entidad
+
+|`@GeneratedValue(strategy=GenerationType.AUTO)`
+| Esta anotation indica que es auto_increment y que se generará por si sola
+
+|`@Column`
+| Esta indicará que es una columna de nuestra BD y que al mismo tiempo es un atributo de nuestra Clase
+
+|`@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)`
+| aquí vamos declarar nuestros tipo de relaciones, en este caso es una relacion de Muchos a Muchos, que la uniremos más adelante.
+
+|`@JoinColumn`
+| Esta anotación sirve para unirla con la otra Entidad que de acuerdo al codigo se va a unir con la tabla Productos.
+
+|===
+
+Complementos
+
+* Generaremos sus *GETTERS* y *SETTERS* para tener acceso a sus variables desde otras clases.
+* Haremos nuestros constructores para inicializar las clases.
+* Y por ultimos haremos nuestro método para generar el *JSON*.
+
+
+

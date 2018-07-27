@@ -1,0 +1,269 @@
+== Test 
+Se realizaron varias prubas en nuestro proyecto, debido a esto se genero una nueva carpeta, que contenia nuevas clases que contenian dichos test.
+
+* ApplicationTest
+* HttpRequestTest
+
+== ApplicationTest
+En esta clase se realizaron diferentes pruebas a los repositorios que se guardaran correctamente y que la clase de dicho objeto generara sus atributos diferentes de nulo.
+
+Declaramos los parametros de nuestras pruebas
+
+*Anotation utilizados*
+
+|===
+|*Annotations* |*Funcion*
+
+|@RunWith
+|JUnit invocará la clase a la que hace referencia para ejecutar las pruebas en esa clase en lugar del corredor integrado en JUnit.
+
+|@SpringBootTest
+|Especifica en una clase de prueba que ejecuta pruebas basadas en Spring Boot.
+
+|@Rollback
+|Es una anotación de prueba que se utiliza para indicar si una transacción administrada por prueba se 0debe retrotraer después de que se haya completado el método de prueba.
+
+|@Autowired
+|Marca un constructor, campo, método setter o método de configuración para que las instalaciones de inyección de dependencia de Spring lo conecten automáticamente.
+
+|@Test
+|La anotación Test le dice a JUnit que el método público vacío al que está conectado se puede ejecutar como un caso de prueba. Para ejecutar el método, JUnit primero construye una nueva instancia de la clase y luego invoca el método anotado. Cualquier excepción lanzada por la prueba será informada por JUnit como una falla. Si no se lanzan excepciones, se supone que la prueba tuvo éxito.
+
+|===
+
+Se declaro lo que utilizaremos y utilizaremos la clase Application, tambien se hicieron intancias de las clases que se implementaron.
+
+[source,java]
+----
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = { Application.class })
+@Rollback
+public class ApplicationTest {
+	@Autowired
+	private ServicesImplementUsuario usuarioService;
+	@Autowired
+	private ServicesImplOrden ordenService;
+	@Autowired
+	private ServicesImplProducto productoService;
+----
+
+El primer metodo que se declaro es el probarGuardadoDeProduto, en este se realizan las pruebas de la creación del objeto producto de manera correcta y que los campos no contengan ningun valor nulo y realizar el guardado del objeto producto en el repositorio.
+
+[source,java]
+----
+@Test
+@Rollback
+public void probarGuardadoDeproducto() {
+	Producto producto = new Producto("Audifono", "descripcion", 50);
+	if (producto != null) {
+		productoService.createProductos(producto);
+		assertNotNull("id no es nulo", producto.getId());
+		assertNotNull("nombre no es nulo", producto.getName_product());
+		assertNotNull("desripcion no es nulo", producto.getDescription_product());
+		assertNotNull("precio no es nulo", producto.getPrice_product());
+		assertNotNull("New Order is not null", producto);
+		}
+	}
+----
+
+En el segundo y tercer metodo se realiza la misma tarea, sin embargo cambia el objeto que se esta creando y el repositorio en el cual se estan guardadndo.
+
+[source,java]
+----
+@Test
+	@Rollback
+	public void probarGuardadoUsuario() {
+		Usuario usuario = new Usuario("Eduardo", "Lopez", "1996-02-13", "eduardo@hotmail.com", "51135288", "d",
+				"Romulo", "CDMX", "MX", "MX", "07800");
+		if (usuario != null) {
+			usuarioService.createUsuario(usuario);
+			assertNotNull(usuario.getId());
+			assertNotNull(usuario.getBirthdate());
+			assertNotNull(usuario.getCity());
+			assertNotNull(usuario.getContry());
+			assertNotNull(usuario.getDniNumber());
+			assertNotNull(usuario.getEmailAddress());
+			assertNotNull(usuario.getLastName());
+			assertNotNull(usuario.getName());
+			assertNotNull(usuario.getPhone());
+			assertNotNull(usuario.getPostalCode());
+			assertNotNull(usuario.getStreet1());
+			assertNotNull(usuario.getOrdenes());
+		}
+	}
+
+	@Test
+	@Rollback
+	public void probarGuardadoOrden() {
+		Orden ord = new Orden("Referencia 1", "Firma 1", "150.80");
+		new Usuario("Eduardo", "Lopez", "1996-02-13", "eduardo@hotmail.com", "51135288", "d", "Romulo", "CDMX", "MX",
+				"MX", "07800");
+		new Producto("Audifono", "descripcion", 50);
+		CreditCardRequest cc = new CreditCardRequest("4083345039770442", "916", "2018/09", "REJECTED", "VISA");
+		if (ord != null) {
+			ordenService.createOrdeni(1L, ord);
+			ordenService.createOrdenConProducto(1L, 1L, ord, cc);
+			assertNotNull(ord.getFirma());
+			assertNotNull(ord.getId());
+			assertNotNull(ord.getProductos());
+			assertNotNull(ord.getReferencia());
+			assertNotNull(ord.getTotal());
+			assertNotNull(ord.getUsuario());
+			assertNotNull(ord);
+		}
+
+	}
+----
+
+== HttpRequestTest
+En esta clase se realizaron diferentes pruebas a las peticiones que se realizan de manera post y get, los cuales son las siguientes.
+
+* *Post*
+** EnvioJson
+** EnvioToken	
+* *Get*
+** PaginaDisponibleLocal	
+** PaginaDisponiblePayU	
+** PaginaTokenDisponibleLocal	
+** PaginaUsuariosDisponibleLocal	
+** PaginaordenesDisponibleLocal	
+** PaginaproductosDisponibleLocal	
+
+Declaramos los parametros de nuestras pruebas
+
+*Anotation utilizados*
+
+|===
+|*Annotations* |*Funcion*
+
+|@RunWith
+|JUnit invocará la clase a la que hace referencia para ejecutar las pruebas en esa clase en lugar del corredor integrado en JUnit.
+
+|@SpringBootTest
+|Especifica en una clase de prueba que ejecuta pruebas basadas en Spring Boot.
+
+|@Autowired
+|Marca un constructor, campo, método setter o método de configuración para que las instalaciones de inyección de dependencia de Spring lo conecten automáticamente.
+
+|@LocalServerPort
+|Anotación en el campo o nivel de parámetro de método / constructor que inyecta el puerto HTTP que se asignó en el tiempo de ejecución.
+
+|@Test
+|La anotación Test le dice a JUnit que el método público vacío al que está conectado se puede ejecutar como un caso de prueba. Para ejecutar el método, JUnit primero construye una nueva instancia de la clase y luego invoca el método anotado. Cualquier excepción lanzada por la prueba será informada por JUnit como una falla. Si no se lanzan excepciones, se supone que la prueba tuvo éxito.
+
+|===
+
+=== *Pruebas de Get*
+EL metodo *PaginaDisponibleLocal()* realiza una prueba si esta disponible nuestro servidor el cual esperemos que contenga la palabra Bienvenidos.
+
+[source,java]
+----
+	@Test
+	public void PaginaDisponibleLocal() throws Exception {
+		assertThat(this.restTemplate.getForObject("http://localhost:" + port + "/", String.class))
+				.contains("Bienvenidos");
+	}
+----
+
+El metodo *PaginaproductosDisponibleLocal()* realiza una prueba de la disponibilidad dela direccion /productos_json el cual debe contener "id".
+
+[source,java]
+----
+@Test
+	public void PaginaproductosDisponibleLocal() throws Exception {
+		assertThat(this.restTemplate.getForObject("http://localhost:" + port + "/productos_json", String.class))
+				.contains("\"id\"");
+	}
+----
+EL metodo *PaginaordenesDisponibleLocal()* realiza una prueba de la disponibilidad dela direccion /ordenes_json el cual debe contener "id".
+
+[source,java]
+----
+@Test
+	public void PaginaordenesDisponibleLocal() throws Exception {
+		assertThat(this.restTemplate.getForObject("http://localhost:" + port + "/ordenes_json", String.class))
+				.contains("\"id\"");
+	}
+
+----
+
+EL metodo *PaginaUsuariosDisponibleLocal()* realiza una prueba de la disponibilidad dela direccion /usuarios_json el cual debe contener "id".
+
+[source,java]
+----
+@Test
+	public void PaginaUsuariosDisponibleLocal() throws Exception {
+		assertThat(this.restTemplate.getForObject("http://localhost:" + port + "/usuarios_json", String.class))
+				.contains("\"id\"");
+	}
+----
+
+EL metodo *PaginaTokenDisponibleLocal()* realiza una prueba de la disponibilidad dela direccion /token el cual debe contener "Error", debido a que solo estamos probando si nos da una respuesta.
+
+[source,java]
+----
+@Test
+	public void PaginaTokenDisponibleLocal() throws Exception {
+		assertThat(this.restTemplate.getForObject("http://localhost:" + port + " \token", String.class))
+				.contains("Error");
+	}
+----
+
+EL metodo *PaginaDisponiblePayU()* realiza una prueba de la disponibilidad dela direccion https://sandbox.api.payulatam.com/payments-api/ el cual debe contener "Payments API Running", en el cual checaremos que el servidor de PayU Se encuentra activo.
+
+[source,java]
+----
+	@Test
+	public void PaginaDisponiblePayU() throws Exception {
+		assertThat(this.restTemplate.getForObject("https://sandbox.api.payulatam.com/payments-api/", String.class))
+				.contains("Payments API Running");
+	}
+----
+
+=== *Pruebas de Post*
+EL metodo *EnvioJson()* realiza una prueba del request que le estamos haciendo al servidor de PayU de una compra en al cual se generan todos los objetos que se necesitan y el post con los headers necesarios, esperamos recibir un "SUCCESS".
+
+[source,java]
+----
+@Test
+	public void EnvioJson() throws Exception {
+		MerchantRequest merchant = new MerchantRequest();
+		Usuario us = new Usuario("Eduardo", "Lopez", "1996-02-23", "eduardo@hotmail.com", "51135288", "5415668464654",
+				"Romulo", "CDMX", "MX", "MX", "07800");
+		Orden ordeeen = new Orden("", "", "180.5", us);
+		OrderRequest order = new OrderRequest(ordeeen, us);
+		CreditCardRequest cc = new CreditCardRequest("4083345039770442", "916", "2018/09", "REJECTED", "VISA");
+		TransactionRequest t = new TransactionRequest(order, us, cc);
+		PagoRequest pago = new PagoRequest(merchant, t);
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.set("Content-Type", "application/json");
+		httpHeaders.set("Accept", "application/json");
+		HttpEntity<String> httpEntity = new HttpEntity<String>(pago.toJsonPago(), httpHeaders);
+		RestTemplate restTemplate = new RestTemplate();
+		assertThat(restTemplate.postForObject("https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi",
+				httpEntity, String.class)).contains("SUCCESS");
+	}
+----
+
+EL metodo *EnvioJson()* realiza una prueba del request que le estamos haciendo al servidor de PayU para generar un token  para esto se generan todos los objetos que se necesitan y el post con los headers necesarios, esperamos recibir un "SUCCESS".
+
+[source,java]
+----
+@Test
+	public void EnvioToken() throws Exception {
+		CreditCardRequest cc = new CreditCardRequest("4083345039770442", "916", "2018/09", "REJECTED", "VISA");
+		// Aqui va la peticion al servidor PayU
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.set("Content-Type", "application/json");
+		httpHeaders.set("Accept", "application/json");
+		HttpEntity<String> httpEntity = new HttpEntity<String>(cc.toJsonCreditCard(), httpHeaders);
+		RestTemplate restTemplate = new RestTemplate();
+		// Termina la peticion y da respuesta
+		assertThat(restTemplate.postForObject("https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi",
+				httpEntity, String.class).contains("SUCCESS"));
+	}
+----
+
+== *Resultados de las pruebas*
+Al realizar cada una de estas pruebas se obtuvieron satisfactoriamente los resultados, el cual nuestro proyecto pasaba cada una de ellas, y se pueden observar dando click en link:./test/index.html[Resultado] , mostrando cada uno de los metodos anteriormente definidos y un detallado de las pruebas realizadas.
+

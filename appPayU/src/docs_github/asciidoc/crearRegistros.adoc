@@ -1,0 +1,184 @@
+= Guardar registros
+
+En esta guia le enseñaremos a guardar registros
+
+== VIsta (Formulario)
+
+Crearemos una vista simple para guardar un registro en HTML Thymeleaf. Donde será almacenada en la ruta: _src/main/resources/templates/index.html_ 
+
+[source, html]
+----
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<title>Registro</title>
+    	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	</head>
+	<body>
+		<h3>Agregar Usuarios</h3>
+		<br>	
+		<form action="#" th:action="@{/usuarios}" th:object="${usuarios}" method="POST">
+			<label>Nombre:</label>
+			<input id="name" name="name" type="text">
+			<br>
+			<label>Apellido:</label>
+			<input id="lastName" name="lastName" type="text">
+			<br>
+			<label>Fecha de Nacimiento:</label>
+			<input id="birthdate" name="birthdate" type="date">
+			<br>
+			<label>Email:</label>
+			<input id="emailAddress" name="emailAddress" type="email">
+			<br>
+			<label>Telefono:</label>
+			<input id="phone" name="phone" type="text">
+			<br>
+			<label>DNI Number:</label>
+			<input id="dniNumber" name="dniNumber" type="text">
+			<br>
+			<label>Calle:</label>
+			<input id="street1" name="street1" type="text">
+			<br>
+			<label>Ciudad:</label>
+			<input id="city" name="city" type="text">
+			<br>
+			<label>CP:</label>
+			<input id="postalCode" name="postalCode" type="text">
+			<br>
+			<label>Pais:</label>
+			<input id="contry" name="contry" type="text">
+			<br>
+			<p><button class="btn btn-success form-control" type="submit">Guardar</button> <button class="btn btn-danger form-control" type="reset">Reset</button></p>
+		</form>
+	</body>
+</html>
+----
+
+Este es un formulario simple que lo que hace a la hora de hacer submit es que crea un objeto y con el nombre *usuarios* y lo manda al controlador con la siguiente ruta: _/usuarios_ el cual declararemos para que método lo reciba.
+
+
+== Controlador
+
+Se generará un formulario en el cual mandaremos los datos del usuario en este controlador, que este a su vez hara la petición de un servicio al servidor, crearemos el controlador en la siguiente ruta _src/main/controllers_.
+
+[source,java]
+----
+package com.vintec.appPayU.controllers;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.vintec.appPayU.models.Usuario;
+import com.vintec.appPayU.repositories.UsuarioRepository;
+import com.vintec.appPayU.services.ServiceUsuarios;
+
+@RestController
+public class UsuarioController {
+
+	@Autowired
+	ServiceUsuarios servUsu;
+
+	@PostMapping(value="/usuarios")
+	public String createUsuario(@ModelAttribute Usuario usuario){
+		return servUsu.createUsuario(usuario);
+	}
+}
+----
+
+* La anotation `@RestController` sirve para identificar que es un controlador a diferencia del otro controlador es que este hace las peticiones REST.
+* La anotation `@Autowired` permite inyectar las dependcias de las demás clases.
+* Declaramos una variable de la clase _ServicioUsuarios_ para acceder al método de crear usuario, estó hará la comunicación MVC. 
+* `@PostMapping(value="/usuarios")` indicando que lo hará mediante el método POST con la URL _/usuarios_.
+* El método createUsuario recibe como parametro un objeto de tipo Usuario que es el que recibe del formulario de las vistas.
+
+
+== Service
+
+Vamos a declarar el método para poder crear el usuario, en este se hará la interfaz en la siguiente ruta: _src/main/java/services/ServiceUsuarios.java_
+
+[source,java]
+----
+package com.vintec.appPayU.services;
+
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import com.vintec.appPayU.models.Usuario;
+
+public interface ServiceUsuarios {
+	
+	public String createUsuario(@ModelAttribute Usuario usuario);
+}
+----
+
+El anotation `@ModelAttribute` servirá para poder aceptar el objeto que se envío desde el formulario, en el siguiente archivo se implementará toda la logica de los métodos creados en el services.
+
+
+== Service Implements
+
+Crearemos el archivo en la siguiente ruta: _src/main/java/services/imple/ServiceUsuarioImple.java_, en el cual le implementaremos la interfaz _ServiceUsuario.java_ para acceder todos los métodos declarados.
+
+[source,java]
+----
+package com.vintec.appPayU.services.imple;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.vintec.appPayU.models.Usuario;
+import com.vintec.appPayU.repositories.UsuarioRepository;
+import com.vintec.appPayU.services.ServiceUsuarios;
+
+@Service("serviceUsuario")
+public class ServiceUsuarioImple implements ServiceUsuarios {
+	
+	@Autowired
+	UsuarioRepository usuarioRepository;
+
+	@Override
+	public String createUsuario(Usuario usuario) {
+		usuarioRepository.save(usuario);
+		return "index";
+	}
+}
+----
+
+* Esta clase tendrá al inicio la anotation `@Service` indicando que será un servicio y pueda hacer su lógica
+* Declaramos un variable de tipo _UsuarioRepositorio_ que será la clase que accederá a todos las acciones que pueda hacer en la BD, anteponiendo la anotation `@Autowired` para poder inyectar todas las clases.
+* La anotation `@Override` nos sirve para poder sobreescribir el metodo en tiempo de ejecusión
+* Hacemos el método _createUsuario()_ para que pueda salvar el objeto que se guardó desde el formulario y retornará la vista que queremos mostrar.
+
+
+== Repositorios
+
+Estas son clases que extenderan de las clases _CrudRepository_ para poder acceder a la BD y hacer todas las querys que vallamos hacer, el siguiente archivo lo vamos a crear en la ruta: _src/main/java/repositories/UsuarioRepository.java_
+
+[source, java]
+----
+package com.vintec.appPayU.repositories;
+
+import java.util.List;
+
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+
+import com.vintec.appPayU.models.Usuario;
+
+@Repository
+public interface UsuarioRepository extends CrudRepository<Usuario, Long>{
+
+	List<Usuario> findAll();
+}
+----
+
+* Le anteponemos la anotation `@Repository` para indicar que es un repositorio
+* Extenderá como ya lo hemos mencionado de la clases _CrudRepository_ que esta ya viene en el Framework de Spring poniendo las librerias necesarias que se encuentran en el _build.gradle_ 
+* Nota: Hay algunas Querys que no son necesarias declarar ya que ya están definidas por default, solo declararemos consultas especiales que sean un poco más complejas, en el ejemplo que esta declarado es que estamos haciendo una lista de usuarios con el método _findAll()_ que nos traerá todos los de la BD.

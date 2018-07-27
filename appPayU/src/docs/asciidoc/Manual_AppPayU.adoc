@@ -1,11 +1,445 @@
+:sourcedir: ../src/main/java
+
 = Manual Técnico de "appPayU"
+
 Desarrolladores de "appPayU"
 2018-07-27
-:revnumber: 1.0
+:versión: 1.0
 ifndef::imagesdir[:imagesdir: images]
 
 [.thumb]
 image::payu-dev.png[scaledwidth=100%]
+
+== Introducción
+
+[.text-left]
+Nuestra aplicación cuanta con implementación de JPA hibernate con el API de PayU, con fines prácticos se realizo este proyecto, se ralizo una pagina en el cual se podrían registrar productos y usuarios, en el apartado de ordenes apartir de los usuarios y productos registrados se generaba la orden y se mandaba un post al servidor con los datos del usuario y los productos, el servidor nos contestaba y en base en eso se mostraba una nueva pantalla que tenia dos posibles resultados, éxito o error. En la siguiente pestaña se realiza un Token en el cual con los datos de un usuario y una tarjeta de crédito se envía una petición al servidor, el cual dependiendo de que respondía se mostraba una pantalla en el cual decía éxito y nuestro Token o en el otro caso una de error.
+
+== Vista principal
+
+[.thumb]
+image::vista.jpg[]
+
+== Modelo de datos
+
+Utilizamos tres tablas en la base de datos las cuales tienen relaciones entre si, ya que para mandar la petición de pago necesitamos los datos de cada una de estas tablas. Los datos de los usuarios se necesitan para toda la información relacionada con el pago por medio de la tarjeta de crédito, dado esto y la información dada por la API
+de PayU, para tener todo sistematizado y llevar un orden se tiene una relación de uno a muchos en las ordenes
+con el usuario debido a que un usuario puede tener muchas ordenes y por parte de las ordenes
+una orden tiene varios productos.
+
+image::diagmod.png[]
+
+== Definiendo MVC
+
+En esta guia se explicará como se hace la iteracción entre modelos vistas y controladores (MVC), la estructura del proyecto y como podremos llamar a nuestras vistas.
+
+
+== Controller 
+
+Vamos a generar en la siguiente ruta un controlador _src/main/java/controllers_ el archivo _InicioController.java_, para poder llamar las vistas correspondientes de acuerdo al requerimiento de nuestro sistema.
+
+[source,java]
+----
+package com.vintec.appPayU.controllers;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+
+@Controller
+public class InicioController {
+	
+	@GetMapping("/")
+	public String getIndex() {
+		return "index";
+	}
+	
+}
+----
+
+La annotation `@Controller` indicara a la clase que es de tipo controlador, redireccionara las vistas necesarias, el `@GetMapping` se hará la petición de tipo GET ya que solo mostrará la vista, haremos el método de Index de tipo String que está a su vez retornará la cadena con el nombre de la vista HTML.
+
+
+== Vista
+
+Vamos a crear nuestras rutas en la siguiente ruta _src/main/resources/templates/index.html_, vamos a generar todo nuestro codigo HTML segun de acuerdo a nuestro requerimiento como el siguiente ejemplo.
+
+[source,html]
+----
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+	<head> 
+	    <title>Bienvenidos</title>
+	    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	</head>
+	<body>
+		<h1>Hola Mundo</h1>
+	</body>
+</html>
+----
+
+Esta es una vista sencilla que solo imprime un Hola Mundo, el tipo de la vista es Thymeleaf, que es una platilla HTML basado en java para Spring Framework.
+
+
+== Modelos
+
+Los modelos que empleamos en este proyecto son las clases de acuerdo a nuestro ejemplo que es un sistema de compra, en donde necesasitamos Usuarios, Productos y Ordenes, aquí vamos a definir todos los atributos de nuestras clases y las relaciones entre clases, si es de `@OneToOne`, `@OneToMany`, `@ManyToMany`, dependiendo de nuestro sistema, haremos el ejemplo de la clase orden ya que esta se relacionará con las clases de Usuario y Producto.
+
+Crearemos la clase _Orden.java_ en nuestro paquetes de Models que es la siguiente ruta: _src/main/java/models_
+
+[source,java]
+----
+package com.vintec.appPayU.models;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+@Entity
+@Table(name = "ordenes")
+public class Orden {
+	
+	@Id
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    private Long id;
+	
+	@Column
+	private String referencia = "payment_test_99900001";
+	
+	@Column
+	private String firma = "69d419f89fb8ed7f80fd7b42bd2ff048";
+	
+	@Column
+	private String total;
+	
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "usuario_id")
+	@JsonIgnore
+	private Usuario usuario;
+	
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinColumn
+	@Column(unique = false)
+	private Set<Producto> productos = new HashSet<>();
+	
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getReferencia() {
+		return referencia;
+	}
+
+	public void setReferencia(String referencia) {
+		this.referencia = referencia;
+	}
+
+	public String getFirma() {
+		return firma;
+	}
+
+	public void setFirma(String firma) {
+		this.firma = firma;
+	}
+
+	public String getTotal() {
+		return total;
+	}
+
+	public void setTotal(String total) {
+		this.total = total;
+	}
+	
+	public Usuario getUsuario() {
+		return usuario;
+	}
+	
+	public void setUsuario(Usuario usuario) {
+		this.usuario = usuario;
+	}
+	
+	public Set<Producto> getProductos() {
+		return productos;
+	}
+	
+	public void setProductos(Set<Producto> productos) {
+		this.productos = productos;
+	}
+	
+	public Orden(String referencia, String firma) {
+		this.firma = firma;
+		this.referencia = referencia;
+	}
+	
+	public Orden(String referencia, String firma, String total) {
+		this.firma = firma;
+		this.referencia = referencia;
+		this.total = total;
+	}
+	
+	public Orden(String referencia, String firma, String total, Usuario usuario) {
+		this.firma = firma;
+		this.referencia = referencia;
+		this.total = total;
+		this.usuario = usuario;
+	}
+	
+	public Orden(String referencia, String firma, Usuario usuario, Set<Producto> productos) {
+		this.firma = firma;
+		this.referencia = referencia;
+		this.usuario = usuario;
+		this.productos = productos;
+	}
+	
+	public Orden() {}
+	
+	@Override
+	public String toString() {
+		double subtotal = 0;
+		for (Producto producto : productos) {
+			  subtotal += producto.getPrice_product();
+			}
+		this.total = String.valueOf(subtotal);
+		String salida = "Orden [id=" + id + ", referencia=" + referencia + ", firma=" + firma + ", total=" + total + "]; ";
+		return salida;
+    }
+	
+	public String toJsonTotal() {
+		return "\"additionalValues\":{ \"TX_VALUE\": { \"value\":"+total+", \"currency\":\"MXN\"}},";
+    }
+}
+----
+
+Las clases se definen como Entidades con la Anotación `@Entity` así como también la nombraremos con la anotación `Table(name = "ordenes")`, explicaremos las siguientes anotaciones:
+
+|===
+
+| *Annotations* | *Funciones* 
+
+|`@Id`
+|definimos que es la columna de Id de nuestra Entidad
+
+|`@GeneratedValue(strategy=GenerationType.AUTO)`
+| Esta anotation indica que es auto_increment y que se generará por si sola
+
+|`@Column`
+| Esta indicará que es una columna de nuestra BD y que al mismo tiempo es un atributo de nuestra Clase
+
+|`@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)`
+| aquí vamos declarar nuestros tipo de relaciones, en este caso es una relacion de Muchos a Muchos, que la uniremos más adelante.
+
+|`@JoinColumn`
+| Esta anotación sirve para unirla con la otra Entidad que de acuerdo al codigo se va a unir con la tabla Productos.
+
+|===
+
+Complementos
+
+* Generaremos sus *GETTERS* y *SETTERS* para tener acceso a sus variables desde otras clases.
+* Haremos nuestros constructores para inicializar las clases.
+* Y por ultimos haremos nuestro método para generar el *JSON*.
+
+== Guardar registros
+
+En esta guia le enseñaremos a guardar registros
+
+== VIsta (Formulario)
+
+Crearemos una vista simple para guardar un registro en HTML Thymeleaf. Donde será almacenada en la ruta: _src/main/resources/templates/index.html_ 
+
+[source, html]
+----
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<title>Registro</title>
+    	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	</head>
+	<body>
+		<h3>Agregar Usuarios</h3>
+		<br>	
+		<form action="#" th:action="@{/usuarios}" th:object="${usuarios}" method="POST">
+			<label>Nombre:</label>
+			<input id="name" name="name" type="text">
+			<br>
+			<label>Apellido:</label>
+			<input id="lastName" name="lastName" type="text">
+			<br>
+			<label>Fecha de Nacimiento:</label>
+			<input id="birthdate" name="birthdate" type="date">
+			<br>
+			<label>Email:</label>
+			<input id="emailAddress" name="emailAddress" type="email">
+			<br>
+			<label>Telefono:</label>
+			<input id="phone" name="phone" type="text">
+			<br>
+			<label>DNI Number:</label>
+			<input id="dniNumber" name="dniNumber" type="text">
+			<br>
+			<label>Calle:</label>
+			<input id="street1" name="street1" type="text">
+			<br>
+			<label>Ciudad:</label>
+			<input id="city" name="city" type="text">
+			<br>
+			<label>CP:</label>
+			<input id="postalCode" name="postalCode" type="text">
+			<br>
+			<label>Pais:</label>
+			<input id="contry" name="contry" type="text">
+			<br>
+			<p><button class="btn btn-success form-control" type="submit">Guardar</button> <button class="btn btn-danger form-control" type="reset">Reset</button></p>
+		</form>
+	</body>
+</html>
+----
+
+Este es un formulario simple que lo que hace a la hora de hacer submit es que crea un objeto y con el nombre *usuarios* y lo manda al controlador con la siguiente ruta: _/usuarios_ el cual declararemos para que método lo reciba.
+
+
+== Controlador
+
+Se generará un formulario en el cual mandaremos los datos del usuario en este controlador, que este a su vez hara la petición de un servicio al servidor, crearemos el controlador en la siguiente ruta _src/main/controllers_.
+
+[source,java]
+----
+package com.vintec.appPayU.controllers;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.vintec.appPayU.models.Usuario;
+import com.vintec.appPayU.repositories.UsuarioRepository;
+import com.vintec.appPayU.services.ServiceUsuarios;
+
+@RestController
+public class UsuarioController {
+
+	@Autowired
+	ServiceUsuarios servUsu;
+
+	@PostMapping(value="/usuarios")
+	public String createUsuario(@ModelAttribute Usuario usuario){
+		return servUsu.createUsuario(usuario);
+	}
+}
+----
+
+* La anotation `@RestController` sirve para identificar que es un controlador a diferencia del otro controlador es que este hace las peticiones REST.
+* La anotation `@Autowired` permite inyectar las dependcias de las demás clases.
+* Declaramos una variable de la clase _ServicioUsuarios_ para acceder al método de crear usuario, estó hará la comunicación MVC. 
+* `@PostMapping(value="/usuarios")` indicando que lo hará mediante el método POST con la URL _/usuarios_.
+* El método createUsuario recibe como parametro un objeto de tipo Usuario que es el que recibe del formulario de las vistas.
+
+
+== Service
+
+Vamos a declarar el método para poder crear el usuario, en este se hará la interfaz en la siguiente ruta: _src/main/java/services/ServiceUsuarios.java_
+
+[source,java]
+----
+package com.vintec.appPayU.services;
+
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import com.vintec.appPayU.models.Usuario;
+
+public interface ServiceUsuarios {
+	
+	public String createUsuario(@ModelAttribute Usuario usuario);
+}
+----
+
+El anotation `@ModelAttribute` servirá para poder aceptar el objeto que se envío desde el formulario, en el siguiente archivo se implementará toda la logica de los métodos creados en el services.
+
+
+== Service Implements
+
+Crearemos el archivo en la siguiente ruta: _src/main/java/services/imple/ServiceUsuarioImple.java_, en el cual le implementaremos la interfaz _ServiceUsuario.java_ para acceder todos los métodos declarados.
+
+[source,java]
+----
+package com.vintec.appPayU.services.imple;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.vintec.appPayU.models.Usuario;
+import com.vintec.appPayU.repositories.UsuarioRepository;
+import com.vintec.appPayU.services.ServiceUsuarios;
+
+@Service("serviceUsuario")
+public class ServiceUsuarioImple implements ServiceUsuarios {
+	
+	@Autowired
+	UsuarioRepository usuarioRepository;
+
+	@Override
+	public String createUsuario(Usuario usuario) {
+		usuarioRepository.save(usuario);
+		return "index";
+	}
+}
+----
+
+* Esta clase tendrá al inicio la anotation `@Service` indicando que será un servicio y pueda hacer su lógica
+* Declaramos un variable de tipo _UsuarioRepositorio_ que será la clase que accederá a todos las acciones que pueda hacer en la BD, anteponiendo la anotation `@Autowired` para poder inyectar todas las clases.
+* La anotation `@Override` nos sirve para poder sobreescribir el metodo en tiempo de ejecusión
+* Hacemos el método _createUsuario()_ para que pueda salvar el objeto que se guardó desde el formulario y retornará la vista que queremos mostrar.
+
+
+== Repositorios
+
+Estas son clases que extenderan de las clases _CrudRepository_ para poder acceder a la BD y hacer todas las querys que vallamos hacer, el siguiente archivo lo vamos a crear en la ruta: _src/main/java/repositories/UsuarioRepository.java_
+
+[source, java]
+----
+package com.vintec.appPayU.repositories;
+
+import java.util.List;
+
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+
+import com.vintec.appPayU.models.Usuario;
+
+@Repository
+public interface UsuarioRepository extends CrudRepository<Usuario, Long>{
+
+	List<Usuario> findAll();
+}
+----
+
+* Le anteponemos la anotation `@Repository` para indicar que es un repositorio
+* Extenderá como ya lo hemos mencionado de la clases _CrudRepository_ que esta ya viene en el Framework de Spring poniendo las librerias necesarias que se encuentran en el _build.gradle_ 
+* Nota: Hay algunas Querys que no son necesarias declarar ya que ya están definidas por default, solo declararemos consultas especiales que sean un poco más complejas, en el ejemplo que esta declarado es que estamos haciendo una lista de usuarios con el método _findAll()_ que nos traerá todos los de la BD.
 
 == Servicios APIRest PayU
 
@@ -363,3 +797,278 @@ Aqui tiene su token mi estimado:
 454234b1-e40c-4a09-8531-9f1632c5dbbe
 
 ----
+
+== Test
+ 
+Se realizaron varias prubas en nuestro proyecto, debido a esto se genero una nueva carpeta, que contenia nuevas clases que contenian dichos test.
+
+* ApplicationTest
+* HttpRequestTest
+
+== ApplicationTest
+
+En esta clase se realizaron diferentes pruebas a los repositorios que se guardaran correctamente y que la clase de dicho objeto generara sus atributos diferentes de nulo.
+
+Declaramos los parametros de nuestras pruebas
+
+*Anotation utilizados*
+
+|===
+|*Annotations* |*Funcion*
+
+|@RunWith
+|JUnit invocará la clase a la que hace referencia para ejecutar las pruebas en esa clase en lugar del corredor integrado en JUnit.
+
+|@SpringBootTest
+|Especifica en una clase de prueba que ejecuta pruebas basadas en Spring Boot.
+
+|@Rollback
+|Es una anotación de prueba que se utiliza para indicar si una transacción administrada por prueba se 0debe retrotraer después de que se haya completado el método de prueba.
+
+|@Autowired
+|Marca un constructor, campo, método setter o método de configuración para que las instalaciones de inyección de dependencia de Spring lo conecten automáticamente.
+
+|@Test
+|La anotación Test le dice a JUnit que el método público vacío al que está conectado se puede ejecutar como un caso de prueba. Para ejecutar el método, JUnit primero construye una nueva instancia de la clase y luego invoca el método anotado. Cualquier excepción lanzada por la prueba será informada por JUnit como una falla. Si no se lanzan excepciones, se supone que la prueba tuvo éxito.
+
+|===
+
+Se declaro lo que utilizaremos y utilizaremos la clase Application, tambien se hicieron intancias de las clases que se implementaron.
+
+[source,java]
+----
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = { Application.class })
+@Rollback
+public class ApplicationTest {
+	@Autowired
+	private ServicesImplementUsuario usuarioService;
+	@Autowired
+	private ServicesImplOrden ordenService;
+	@Autowired
+	private ServicesImplProducto productoService;
+----
+
+El primer metodo que se declaro es el probarGuardadoDeProduto, en este se realizan las pruebas de la creación del objeto producto de manera correcta y que los campos no contengan ningun valor nulo y realizar el guardado del objeto producto en el repositorio.
+
+[source,java]
+----
+@Test
+@Rollback
+public void probarGuardadoDeproducto() {
+	Producto producto = new Producto("Audifono", "descripcion", 50);
+	if (producto != null) {
+		productoService.createProductos(producto);
+		assertNotNull("id no es nulo", producto.getId());
+		assertNotNull("nombre no es nulo", producto.getName_product());
+		assertNotNull("desripcion no es nulo", producto.getDescription_product());
+		assertNotNull("precio no es nulo", producto.getPrice_product());
+		assertNotNull("New Order is not null", producto);
+		}
+	}
+----
+
+En el segundo y tercer metodo se realiza la misma tarea, sin embargo cambia el objeto que se esta creando y el repositorio en el cual se estan guardadndo.
+
+[source,java]
+----
+@Test
+	@Rollback
+	public void probarGuardadoUsuario() {
+		Usuario usuario = new Usuario("Eduardo", "Lopez", "1996-02-13", "eduardo@hotmail.com", "51135288", "d",
+				"Romulo", "CDMX", "MX", "MX", "07800");
+		if (usuario != null) {
+			usuarioService.createUsuario(usuario);
+			assertNotNull(usuario.getId());
+			assertNotNull(usuario.getBirthdate());
+			assertNotNull(usuario.getCity());
+			assertNotNull(usuario.getContry());
+			assertNotNull(usuario.getDniNumber());
+			assertNotNull(usuario.getEmailAddress());
+			assertNotNull(usuario.getLastName());
+			assertNotNull(usuario.getName());
+			assertNotNull(usuario.getPhone());
+			assertNotNull(usuario.getPostalCode());
+			assertNotNull(usuario.getStreet1());
+			assertNotNull(usuario.getOrdenes());
+		}
+	}
+
+	@Test
+	@Rollback
+	public void probarGuardadoOrden() {
+		Orden ord = new Orden("Referencia 1", "Firma 1", "150.80");
+		new Usuario("Eduardo", "Lopez", "1996-02-13", "eduardo@hotmail.com", "51135288", "d", "Romulo", "CDMX", "MX",
+				"MX", "07800");
+		new Producto("Audifono", "descripcion", 50);
+		CreditCardRequest cc = new CreditCardRequest("4083345039770442", "916", "2018/09", "REJECTED", "VISA");
+		if (ord != null) {
+			ordenService.createOrdeni(1L, ord);
+			ordenService.createOrdenConProducto(1L, 1L, ord, cc);
+			assertNotNull(ord.getFirma());
+			assertNotNull(ord.getId());
+			assertNotNull(ord.getProductos());
+			assertNotNull(ord.getReferencia());
+			assertNotNull(ord.getTotal());
+			assertNotNull(ord.getUsuario());
+			assertNotNull(ord);
+		}
+
+	}
+----
+
+== HttpRequestTest
+
+En esta clase se realizaron diferentes pruebas a las peticiones que se realizan de manera post y get, los cuales son las siguientes.
+
+* *Post*
+** EnvioJson
+** EnvioToken	
+* *Get*
+** PaginaDisponibleLocal	
+** PaginaDisponiblePayU	
+** PaginaTokenDisponibleLocal	
+** PaginaUsuariosDisponibleLocal	
+** PaginaordenesDisponibleLocal	
+** PaginaproductosDisponibleLocal	
+
+Declaramos los parametros de nuestras pruebas
+
+*Anotation utilizados*
+
+|===
+|*Annotations* |*Funcion*
+
+|@RunWith
+|JUnit invocará la clase a la que hace referencia para ejecutar las pruebas en esa clase en lugar del corredor integrado en JUnit.
+
+|@SpringBootTest
+|Especifica en una clase de prueba que ejecuta pruebas basadas en Spring Boot.
+
+|@Autowired
+|Marca un constructor, campo, método setter o método de configuración para que las instalaciones de inyección de dependencia de Spring lo conecten automáticamente.
+
+|@LocalServerPort
+|Anotación en el campo o nivel de parámetro de método / constructor que inyecta el puerto HTTP que se asignó en el tiempo de ejecución.
+
+|@Test
+|La anotación Test le dice a JUnit que el método público vacío al que está conectado se puede ejecutar como un caso de prueba. Para ejecutar el método, JUnit primero construye una nueva instancia de la clase y luego invoca el método anotado. Cualquier excepción lanzada por la prueba será informada por JUnit como una falla. Si no se lanzan excepciones, se supone que la prueba tuvo éxito.
+
+|===
+
+=== *Pruebas de Get*
+
+EL metodo *PaginaDisponibleLocal()* realiza una prueba si esta disponible nuestro servidor el cual esperemos que contenga la palabra Bienvenidos.
+
+[source,java]
+----
+	@Test
+	public void PaginaDisponibleLocal() throws Exception {
+		assertThat(this.restTemplate.getForObject("http://localhost:" + port + "/", String.class))
+				.contains("Bienvenidos");
+	}
+----
+
+El metodo *PaginaproductosDisponibleLocal()* realiza una prueba de la disponibilidad dela direccion /productos_json el cual debe contener "id".
+
+[source,java]
+----
+@Test
+	public void PaginaproductosDisponibleLocal() throws Exception {
+		assertThat(this.restTemplate.getForObject("http://localhost:" + port + "/productos_json", String.class))
+				.contains("\"id\"");
+	}
+----
+EL metodo *PaginaordenesDisponibleLocal()* realiza una prueba de la disponibilidad dela direccion /ordenes_json el cual debe contener "id".
+
+[source,java]
+----
+@Test
+	public void PaginaordenesDisponibleLocal() throws Exception {
+		assertThat(this.restTemplate.getForObject("http://localhost:" + port + "/ordenes_json", String.class))
+				.contains("\"id\"");
+	}
+
+----
+
+EL metodo *PaginaUsuariosDisponibleLocal()* realiza una prueba de la disponibilidad dela direccion /usuarios_json el cual debe contener "id".
+
+[source,java]
+----
+@Test
+	public void PaginaUsuariosDisponibleLocal() throws Exception {
+		assertThat(this.restTemplate.getForObject("http://localhost:" + port + "/usuarios_json", String.class))
+				.contains("\"id\"");
+	}
+----
+
+EL metodo *PaginaTokenDisponibleLocal()* realiza una prueba de la disponibilidad dela direccion /token el cual debe contener "Error", debido a que solo estamos probando si nos da una respuesta.
+
+[source,java]
+----
+@Test
+	public void PaginaTokenDisponibleLocal() throws Exception {
+		assertThat(this.restTemplate.getForObject("http://localhost:" + port + " \token", String.class))
+				.contains("Error");
+	}
+----
+
+EL metodo *PaginaDisponiblePayU()* realiza una prueba de la disponibilidad dela direccion https://sandbox.api.payulatam.com/payments-api/ el cual debe contener "Payments API Running", en el cual checaremos que el servidor de PayU Se encuentra activo.
+
+[source,java]
+----
+	@Test
+	public void PaginaDisponiblePayU() throws Exception {
+		assertThat(this.restTemplate.getForObject("https://sandbox.api.payulatam.com/payments-api/", String.class))
+				.contains("Payments API Running");
+	}
+----
+
+=== *Pruebas de Post*
+
+EL metodo *EnvioJson()* realiza una prueba del request que le estamos haciendo al servidor de PayU de una compra en al cual se generan todos los objetos que se necesitan y el post con los headers necesarios, esperamos recibir un "SUCCESS".
+
+[source,java]
+----
+@Test
+	public void EnvioJson() throws Exception {
+		MerchantRequest merchant = new MerchantRequest();
+		Usuario us = new Usuario("Eduardo", "Lopez", "1996-02-23", "eduardo@hotmail.com", "51135288", "5415668464654",
+				"Romulo", "CDMX", "MX", "MX", "07800");
+		Orden ordeeen = new Orden("", "", "180.5", us);
+		OrderRequest order = new OrderRequest(ordeeen, us);
+		CreditCardRequest cc = new CreditCardRequest("4083345039770442", "916", "2018/09", "REJECTED", "VISA");
+		TransactionRequest t = new TransactionRequest(order, us, cc);
+		PagoRequest pago = new PagoRequest(merchant, t);
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.set("Content-Type", "application/json");
+		httpHeaders.set("Accept", "application/json");
+		HttpEntity<String> httpEntity = new HttpEntity<String>(pago.toJsonPago(), httpHeaders);
+		RestTemplate restTemplate = new RestTemplate();
+		assertThat(restTemplate.postForObject("https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi",
+				httpEntity, String.class)).contains("SUCCESS");
+	}
+----
+
+EL metodo *EnvioJson()* realiza una prueba del request que le estamos haciendo al servidor de PayU para generar un token  para esto se generan todos los objetos que se necesitan y el post con los headers necesarios, esperamos recibir un "SUCCESS".
+
+[source,java]
+----
+@Test
+	public void EnvioToken() throws Exception {
+		CreditCardRequest cc = new CreditCardRequest("4083345039770442", "916", "2018/09", "REJECTED", "VISA");
+		// Aqui va la peticion al servidor PayU
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.set("Content-Type", "application/json");
+		httpHeaders.set("Accept", "application/json");
+		HttpEntity<String> httpEntity = new HttpEntity<String>(cc.toJsonCreditCard(), httpHeaders);
+		RestTemplate restTemplate = new RestTemplate();
+		// Termina la peticion y da respuesta
+		assertThat(restTemplate.postForObject("https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi",
+				httpEntity, String.class).contains("SUCCESS"));
+	}
+----
+
+== *Resultados de las pruebas*
+
+Al realizar cada una de estas pruebas se obtuvieron satisfactoriamente los resultados, el cual nuestro proyecto pasaba cada una de ellas, y se pueden observar dando click en link:./test/index.html[Resultado] , mostrando cada uno de los metodos anteriormente definidos y un detallado de las pruebas realizadas.
