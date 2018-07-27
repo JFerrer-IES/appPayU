@@ -11,50 +11,38 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vintec.appPayU.models.Producto;
-import com.vintec.appPayU.repositories.ProductoRepository;
+import com.vintec.appPayU.services.ProductoService;
 
 @RestController
 public class ProductoController {
-
+	
 	@Autowired
-	ProductoRepository productoRepository;
+	ProductoService productoService;
 	
 	@GetMapping("/productos_json")
     public Iterable<Producto> getAllProductos() {
-		return productoRepository.findAll();
+		return productoService.obtenerProductos();
 	}
 	
 	@GetMapping("/productos/{productoId}")
 	public Producto searchProducto(@PathVariable (value = "productoId") Long productoId){
-		return productoRepository.findById(productoId).get();
+		return productoService.buscarProducto(productoId);
 	}
 	
 	@PostMapping("/productos")
 	public Producto createProducto(@ModelAttribute Producto producto){
-		return productoRepository.save(producto);
+		return productoService.guardarProducto(producto);
 	}
 	
 	@PutMapping("/productos/{productoId}")
 	public Producto updateProducto(@PathVariable Long productoId, @ModelAttribute Producto productoRequest) {
-		try {
-	        productoRepository.findById(productoId).ifPresent(producto -> {
-	        	producto.setName_product(productoRequest.getName_product());
-	        	producto.setDescription_product(productoRequest.getDescription_product());
-	        	producto.setPrice_product(productoRequest.getPrice_product());
-	            productoRepository.save(producto);
-	        });
-		}catch (Exception ex) {
-			System.err.println("Usuario " +productoId+ " no encontrado");
-		}
-		return productoRepository.findById(productoId).get();
+		return productoService.actualizarProducto(productoId, productoRequest);
     }
 	
 	@DeleteMapping(path = "/productos/{productoId}", produces = "text/plain")
 	@ResponseBody
     public String deleteUsuario(@PathVariable Long productoId) {
-        productoRepository.findById(productoId).ifPresent(producto -> {
-            productoRepository.delete(producto);
-        });
+		productoService.borrarProducto(productoId);
         return "Borrado completado con exito!";
     }
 }

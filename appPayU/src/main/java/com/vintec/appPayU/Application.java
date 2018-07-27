@@ -12,27 +12,24 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestTemplate;
 
-import com.vintec.appPayU.models.CreditCardRequest;
-import com.vintec.appPayU.models.CreditCardToken;
-import com.vintec.appPayU.models.Merchant;
-import com.vintec.appPayU.models.MerchantRequest;
+import com.vintec.appPayU.dtos.CreditCardRequest;
+import com.vintec.appPayU.dtos.CreditCardToken;
+import com.vintec.appPayU.dtos.Merchant;
+import com.vintec.appPayU.dtos.MerchantRequest;
+import com.vintec.appPayU.dtos.OrderRequest;
+import com.vintec.appPayU.dtos.PagoRequest;
+import com.vintec.appPayU.dtos.TokenRequest;
+import com.vintec.appPayU.dtos.TokenResponse;
+import com.vintec.appPayU.dtos.TransactionRequest;
 import com.vintec.appPayU.models.Orden;
-import com.vintec.appPayU.models.OrderRequest;
-import com.vintec.appPayU.models.PagoRequest;
 import com.vintec.appPayU.models.Producto;
-import com.vintec.appPayU.models.TokenRequest;
-import com.vintec.appPayU.models.TokenResponse;
-import com.vintec.appPayU.models.TransactionRequest;
 import com.vintec.appPayU.models.Usuario;
 import com.vintec.appPayU.repositories.OrdenRepository;
 import com.vintec.appPayU.repositories.ProductoRepository;
 import com.vintec.appPayU.repositories.UsuarioRepository;
 
-
 @SpringBootApplication
 public class Application {
-
-	private static final Logger log = LoggerFactory.getLogger(Application.class);
 
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class);
@@ -42,8 +39,11 @@ public class Application {
 	public CommandLineRunner demo(OrdenRepository ordenRepository, ProductoRepository productoRepository, UsuarioRepository usuarioRepository) {
 
 		return (args) -> {
+			//Logs para el programador
+			Logger log = LoggerFactory.getLogger(Application.class);
+			
 			// guardamos unos cuantos usuarios
-			usuarioRepository.save(new Usuario("Eduardo", "Lopez","1996-02-13","eduardo_zamu@hotmail.com", "51135288","d","Romulo","CDMX","MX", "MX", "07800"));
+			usuarioRepository.save(new Usuario("Eduardo", "Lopez","1996-02-13","eduardo_z@hotmail.com", "51135288","d","Romulo","CDMX","MX", "MX", "07800"));
 			usuarioRepository.save(new Usuario("Luis", "Lopez","1992-03-15","luis@hotmail.com", "52335180","r","Zerman","CDMX","MX", "MX", "07850"));
 			usuarioRepository.save(new Usuario("Andrea", "Peredo","1996-06-20","andrea@hotmail.com", "55135690", "a","Fundidora","CDMX","MX", "MX", "07820"));
 			
@@ -208,7 +208,7 @@ public class Application {
 			log.info("-------------------------------");
 			try {
 				MerchantRequest merchant = new MerchantRequest();
-				Usuario us=new Usuario("Eduardo", "Lopez","1996-02-23","eduardo_zamu@hotmail.com", "51135288","5415668464654","Romulo","CDMX","MX","MX","07800");
+				Usuario us=new Usuario("Eduardo", "Lopez","1996-02-23","eduardo_z@hotmail.com", "51135288","5415668464654","Romulo","CDMX","MX","MX","07800");
 				Orden ordeeen= new Orden("","","180.5",us);
 				OrderRequest order= new OrderRequest(ordeeen,us);
 				CreditCardRequest cc= new CreditCardRequest("4083345039770442","916","2018/09", "REJECTED","VISA");
@@ -229,6 +229,14 @@ public class Application {
 			}catch(Exception ex) {
 				log.info(ex.toString());
 			}
+			log.info("");
+			
+			//Acaba todo
+			log.info("");
+			log.info("----------------------------------------------------------------");
+			log.info("Application.java ah terminado su ejecucion, se levanta servidor");
+			log.info("----------------------------------------------------------------");
+			log.info("");
 			log.info("");
 					
 		}; //Aqui acaba el return (args)

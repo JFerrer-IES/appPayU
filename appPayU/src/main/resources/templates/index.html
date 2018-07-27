@@ -25,7 +25,7 @@
 			<div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
 				<br>
 				<h3 class="text-center">Agregar Productos</h3>
-				<form action="#" th:action="@{/productos}" th:object="${productos}" method="post">
+				<form action="#" th:action="@{/}" th:object="${productos}" method="post">
 					<div class="row">
 						<div class="col-md-4">
 							<div class="form-group">
@@ -55,6 +55,26 @@
 						</div>
 					</div>
 				</form>
+				<hr>
+				<h3 class="text-center">Productos</h3>
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>Nombre</th>
+							<th>Descripcion</th>
+							<th>Precio</th>
+						</tr>
+					</thead>
+					<tbody>
+						 <tr th:each="producto : ${productos}">
+    						<td th:text="${producto.id}"></td>
+    						<td th:text="${producto.name_product}"></td>
+    						<td th:text="${producto.description_product}"></td>
+    						<td th:text="'$ '+${producto.price_product}"></td>
+  						</tr>
+					</tbody>
+				</table>
 			</div>
   			<div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
   				<br>
@@ -135,6 +155,34 @@
 						</div>
 					</div>
 				</form>
+				<hr>
+				<h3 class="text-center">Usuarios</h3>
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>Nombre</th>
+							<th>apellido</th>
+							<th>Fecha Nac</th>
+							<th>Email</th>
+							<th>Telefono</th>
+							<th>DNI</th>
+							<th>Domicilio</th>
+						</tr>
+					</thead>
+					<tbody>
+						 <tr th:each="usuario : ${usuarios}">
+    						<td th:text="${usuario.id}"></td>
+    						<td th:text="${usuario.name}"></td>
+    						<td th:text="${usuario.lastName}"></td>
+    						<td th:text="${usuario.birthdate}"></td>
+    						<td th:text="${usuario.emailAddress}"></td>
+    						<td th:text="${usuario.phone}"></td>
+    						<td th:text="${usuario.dniNumber}"></td>
+    						<td th:text="${usuario.street1}+' '+${usuario.city}+', '+${usuario.contry}+', '+${usuario.postalCode}+'.'"></td>
+  						</tr>
+					</tbody>
+				</table>
   			</div>
   			<div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
   				<br>
@@ -176,7 +224,7 @@
 	    								</div>
 	    								<div class="form-group">
 	    									<label>Num. tarjeta:</label>
-	    									<input class="form-control" id="number" name="number" type="number">
+	    									<input class="form-control" id="number" name="number" type="number" maxlength="16">
 	    								</div>
 	    								<div class="row">
 	    									<div class="col-md-4">
@@ -187,6 +235,7 @@
 		    								</div>
 		    								<div class="col-md-4">
 		    									<div class="form-group">
+		    										<label>Método de pago:</label>
 			    									<select class="form-control" id="paymentMethod" name="paymentMethod">
 			    										<option value="VISA">VISA</option>
 			    										<option value="MASTERCARD">MASTERCARD</option>
@@ -195,7 +244,8 @@
 		    								</div>
 		    								<div class="col-md-4">
 		    									<div class="form-group">
-			    									<input class="form-control" id="securityCode" name="securityCode" length="3" placeholder="CVC" type="password">
+		    										<label>Security code:</label>
+			    									<input class="form-control" id="securityCode" name="securityCode" maxlength="3" placeholder="CVC" type="password">
 			    								</div>
 		    								</div>
 	    								</div>
@@ -253,7 +303,7 @@
     								<div class="col-md-6">
     									<div class="form-group">
 	    									<label for="numeroToken">Número de tarjeta</label>
-	    									<input type="text" id="number" name="number" class="form-control" />
+	    									<input th:type="number" id="number" name="number" class="form-control" maxlength="16"/>
 	    								</div>
     								</div>
     								<div class="col-md-6">

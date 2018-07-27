@@ -1,0 +1,365 @@
+= Manual Técnico de "appPayU"
+Desarrolladores de "appPayU"
+2018-07-27
+:revnumber: 1.0
+ifndef::imagesdir[:imagesdir: images]
+
+[.thumb]
+image::payu-dev.png[scaledwidth=100%]
+
+== Servicios APIRest PayU
+
+En esta aplicacion se llevo a cabo un enlace con los servicios APIRest de PayU, logrando asi laa comunicacion bidireccional entre el programa y el servidor PayU. En esta seccion se mostrara el  proceso a segir para realizar este enlace y explicarlo un poco, para que este sea claro al momento de ejecutar.
+
+=== Tokenizando una tarjeta
+
+==== Introduccion
+
+Esta opcion te permite almacenar los datos de las tarjetas de credito por medio de la creacion de un token, de esta forma las transaccionees son mas agiles en PayU. Hay varios metodos disponibles para la creacion y cobro de tokens pero para ilustrar este ejemplo unicamente utilizaremos el registro de la tarjeta
+y obtencion del token. Este proceso siempre sera el mismo y ayudara a realizar peticiones y recibir respuestas de PayU de una forma genenerica para que pueda ser adaptado a cualquier otro tipo de transaccion.
+
+==== Analizando la peticion
+
+Lo primero que debemos hacer es analizar el formato de como se requiere la peticion el servidor. Lo puede verificar en el ejemplo siguiente: 
+
+[source,json]
+----
+{
+   "language": "es",
+   "command": "CREATE_TOKEN",
+   "merchant": {
+      "apiLogin": "pRRXKOl8ikMmt9u",
+      "apiKey": "4Vj8eK4rloUd272L48hsrarnUA"
+   },
+   "creditCardToken": {
+      "payerId": "10",
+      "name": "full name",
+      "identificationNumber": "32144457",
+      "paymentMethod": "VISA",
+      "number": "4111111111111111",
+      "expirationDate": "2017/01"
+   }
+}
+----
+
+Como se puede observar en el JSON de peticion, tenemos una clase principal que contiene los atributos `languaje` y `command`, ademas de eso el JSON contiene dos objetos `merchant` y `creditCardToken` cada uno con sus respectivos atributos.
+
+==== Creando los dtos para la peticion
+
+Una vez analizada la peticion, se sabe que se necesitan crear 3 clases. Una principal que contendra a su vez las otras dos clases; *Merchant* y *CreditCardToken*. Asi que en nuestro package dto (data transfer object), contendra estas 3 clases con sus respectivos nombres. Yo les asignare el nombre de *_TokenRequest.java_* que es quien hace el JSON principal, *_Merchant.java_* que albergara al objeto `merchant` contendra los atributos `apiLogin` y `apiKey` y finalmente *_CreditCardToken.java_* que albergara al objeto `creditCardToken` con los demas atributos.
+
+Entonces la clase *_TokenRequest.java_* quedaria mas o menos asi:
+
+[source,java]
+----
+public class TokenRequest {
+
+	public String language = "es";
+	
+	public String command = "CREATE_TOKEN";
+	
+	public Merchant merchant;
+	
+	public CreditCardToken creditCardToken;
+	
+	// Getters, Setters y Constructores
+
+	//El metodo toJSON() sera el encargado de generar la peticion.
+	public String toJSON() {
+		return "{\"language\": \"" + language 
+			+ "\", \"command\": \"" + command 
+			+ "\", \"merchant\": " + merchant.toJson() 
+			+ ", \"creditCardToken\": " + creditCardToken.toRequest()
+			+ "}";
+	}
+----
+
+TIP: Como se puede apreciar el metodo principal manda a llamar a los metodos de las clases hijo, asi cada quien imprime sus respectivos atributos y hacen sus propias cadenas JSON. Esta es la forma de hacer el codigo mas robusto y modular.
+
+Ahora vamos a crear la clase *_Merchant.java_* que sera la encargada de darle formato e imprimir los atributos del objeto `merchant`, u quedara como sigue:
+
+[source,java]
+----
+public class Merchant {
+
+	public String apiLogin = "pRRXKOl8ikMmt9u";
+	
+	public String apiKey = "4Vj8eK4rloUd272L48hsrarnUA";
+
+	// Getters, Setters y Constructores
+	
+	//Aqui el metodo toJSON() dara formato a una parte de la peticion.
+	public String toJSON() {
+		return "{\"apiLogin\": \"" + apiLogin 
+			+ "\", \"apiKey\": \"" + apiKey + "\"}";
+	}
+----
+
+Que por su parte solo imprimira:
+
+[source,json]
+----
+"merchant": {
+      "apiLogin": "pRRXKOl8ikMmt9u",
+      "apiKey": "4Vj8eK4rloUd272L48hsrarnUA"
+   },
+----
+
+Solo queda crear la clase *_CreditCardToken.java_* que sera la encargada de recibir la informacion de la tarjeta bancaria e imprimir los atributos en el objeto `creditCardToken`, y quedara asi:
+
+[source,java]
+----
+public class CreditCardToken {
+
+	private String creditCardTokenId;
+	
+	private String name;
+	
+	private String payerId;
+	
+	private String identificationNumber;
+	
+	private String paymentMethod;
+	
+	private String number;
+	
+	private String expirationDate;
+	
+	private String creationDate;
+	
+	private String maskedNumber;
+	
+	private String errorDescription;
+
+	// Getters, Setters y Constructores
+
+	//Aqui el metodo toRequest() dara formato a la otra parte de la peticion.
+	public String toRequest() {
+		return "{\"payerId\": \"" + payerId 
+			+ "\", \"name\": \"" + name 
+			+ "\", \"identificationNumber\": \"" + identificationNumber 
+			+ "\", \"paymentMethod\": \"" + paymentMethod 
+			+ "\", \"number\": \"" + number 
+			+ "\", \"expirationDate\": \"" + expirationDate + "\"}";
+	}
+	
+	//Este metodo recibe la respuesta por parte del servidor
+	public String toResponse() {
+		return "{\"creditCardTokenId\": \"" + creditCardTokenId
+			 + "\", \"name\": \"" + name
+			 + "\", \"payerId\": \"" + payerId
+			 + "\", \"identificationNumber\": \"" + identificationNumber 
+			 + "\", \"paymentMethod\": \"" + paymentMethod 
+			 + "\", \"number\": \"" + number 
+			 + "\", \"expirationDate\": \"" + expirationDate 
+			 + "\", \"creationDate\": \"" + creationDate 
+			 + "\", \"maskedNumber\": \"" + maskedNumber 
+			 + "\", \"errorDescription\": \"" + errorDescription + "\"}";
+	}
+}
+----
+
+NOTE: El metodo toResponse() es un auxiliar para la respuesta del servidor, que veremos mas adelante, asi que no se preste mucha atencion a este metodo.
+
+IMPORTANT: En el codigo se pueden observar que existen mas atributos que los que indica el JSON, esto se debe a que estamos acoplando la clase para recibir respuestas por parte del servidor. Esta es la razon de la existencia del metodo toResponse() y de los atributos extras.
+
+Esta clase imprimira gracias al metodo toRequest() lo siguiente:
+
+[source,json]
+----
+"creditCardToken": {
+   "payerId": "10",
+   "name": "full name",
+   "identificationNumber": "32144457",
+   "paymentMethod": "VISA",
+   "number": "4111111111111111",
+   "expirationDate": "2017/01"
+}
+----
+
+NOTE: Los datos impresos en el JSON, son de referencias, al crear un objeto creditCardToken los valores asignados seran los que mandara el metodo toRequest().
+
+Una vez creados todos los objetos para realizar peticiones, y antes de realizar la peticion, vamos a proceder a crear lo necesario para recuperar la respuesta del servidor de una forma inteligente.
+
+==== Analizando la respuesta
+
+Una vez que tenemos todo preparado para poder realizar la peticion, vamos a recuperar la respuesta del servidor utilizando REST nuevamente para hacer nuestro codigo mas flexible, estos pasos son muy parecidos a la peticion, asi que espero sean entendibles. 
+
+Pues empecemos son ver el ejemplo de respuesta del servidor PayU:
+
+[source,json]
+----
+{
+   "code": "SUCCESS",
+   "error": null,
+   "creditCardToken": {
+      "creditCardTokenId": "3ba2c031-a8c0-4c9f-9025-7eacf8dd14e2",
+      "name": "full name",
+      "payerId": "10",
+      "identificationNumber": "32144457",
+      "paymentMethod": "VISA",
+      "number": null,
+      "expirationDate": null,
+      "creationDate": null,
+      "maskedNumber": "411111******1111",
+      "errorDescription": null
+   }
+}
+----
+
+Recuperar informacion es mas sencillo, ya que solo se necesita un objeto de la clase `CreditCardToken` (Del cual ya tenemos una clase generada) y una clase padre que imprimira la respuesta JSON que acabamos de ver.
+
+==== Creando los dtos para la respuesta
+
+Para estos casos unicamente necesitamos la clase principal que imprimira todo el JSON, clase que llamaremos *_TokenResponse.java_*, y nuestra clase ya creada *_CreditCardToken.java_*.
+
+Entonces nuestra clase *_TokenResponse.java_* quedaria formada por sus atributos; `code` y `error`. Y el codigo es el siguiente:
+
+[source,java]
+----
+public class TokenResponse {
+
+	private String code;
+	
+	private String error;
+	
+	private CreditCardToken creditCardToken;
+	
+	//Setters, Getters y Constructores
+	
+	public TokenResponse(String code, String error, 
+					CreditCardToken creditCardToken) {
+		this.code = code;
+		this.error = error;
+		this.creditCardToken = creditCardToken;
+	}
+
+	//El metodo encargado de imprimir la respuesta en formato JSON
+	public String toJSON() {
+		return "{'code'=" + code 
+			+ ", 'error'=" + error 
+			+ ", 'creditCardToken'=" + creditCardToken.toTokenResponse() 
+			+ "}";
+	}
+}
+
+----
+
+NOTE: Como se puede observar en esta clase y en la respuesta, en la clase `CreditCardToken` implementamos el metodo toTokenResponse() justamente para auxiliar en esta clase y recuperar la respuesta, esta es la razon del porque existian mas metodos y atributos de los que deberia en el archivo *_CreditCardToken.java_*.
+
+IMPORTANT: No olvides que ya tenemos la clase `CreditCardToken` implementada con los metodos y atributos necesarios para recuiperar la respuesta, razon por la cual no vuelvo a colocar la clase completa.
+
+Solo para complementar un poco la informacion, les mostrare la informacion que muestra el metodo toTokenResponse() de la clase `CreditCardToken`:
+
+[source,json]
+----
+"creditCardToken": {
+   "creditCardTokenId": "3ba2c031-a8c0-4c9f-9025-7eacf8dd14e2",
+   "name": "full name",
+   "payerId": "10",
+   "identificationNumber": "32144457",
+   "paymentMethod": "VISA",
+   "number": null,
+   "expirationDate": null,
+   "creationDate": null,
+   "maskedNumber": "411111******1111",
+   "errorDescription": null
+}
+----
+
+¡Ahora, vamos a integrar todo!
+
+==== Creando y ejecutando la peticion
+
+Para ilustrar este ejemplo vamos a necesitar de nuestra clase *_Application.java_* que ademas de correr nuestra interfaz grafica echa en Thymeleaf, tendra un `@Bean` encargado de realizar la peticion y mostrarnos el resultado.
+
+Asi que anexamos despues der nuestro main el siguiente codigo:
+
+[source,java]
+----
+@Bean
+public CommandLineRunner demo() {
+	return (args) -> {
+		//Logs para el programador
+		Logger log = LoggerFactory.getLogger(Application.class);
+		
+		//Vamos a tokenizar
+		log.info("Peticion de tokenizar");
+		log.info("*******************************");
+		//Un try para detectar a tiempo errores
+		try {
+			//Creamos nuestro objeto de prueba con los datos de la tarjeta
+			CreditCardToken creditCardToken = new CreditCardToken
+			("10", "full name", "32144457", "VISA", "4111111111111111", "2019/01");
+			//El objeto merchant con las llaves API
+			Merchant merchant = new Merchant();
+			//El objeto token que imprime el JSON completo
+			//Se como parametros los objetos que necesitara
+			TokenRequest tokenRequest = new TokenRequest(merchant, creditCardToken);
+			//Un log para verificar si nuestro JSON esta correcto
+			log.info(tokenRequest.toJSON());
+			log.info("");
+			
+			//Aqui se construye la peticion para servidor PayU
+			//Le colocamos headers a la peticion
+			HttpHeaders httpHeaders = new HttpHeaders();
+			//El formato de la peticion
+			httpHeaders.set("Content-Type","application/json");
+			//El formato de lo que espera como respuesta
+			httpHeaders.set("Accept","application/json");
+			//Se crea la peticion con un HttpEntity
+			//Donde el metodo toJSON() es el que imprime el cuerpo
+			//Y donde httpHeaders, son los headers anteriormente vistos 
+			HttpEntity <String> httpEntity = new HttpEntity <String> 
+			(tokenRequest.toJSON(), httpHeaders);
+			//Utilizamos un objeto RestTemplate para nuestra peticion REST
+			RestTemplate restTemplate = new RestTemplate();
+			
+			//Un try anidado esta vez para detectar errores en la respuesta
+			try {
+				log.info("");
+				log.info("Respuesta de tokenizar");
+				log.info("*******************************");
+				//Asignamos la respuesta a nuestro objeto que recibe la info
+				TokenResponse tokenResponse = restTemplate.postForObject
+				("https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi",
+				httpEntity, TokenResponse.class);
+				//Imprimimos la respuesta gracias a nuestro objeto TokenResponse
+				log.info(tokenResponse.toJSON());
+				log.info("");
+				//Recuperamos el unico campo que nos importa gracias al objeto
+				log.info("Aqui tiene su token mi estimado: ");
+				//Obtenemos el objeto creditCardToken del TokenResponse
+				//Y obtenemos el valor del campo creditCardTokenId
+				log.info(tokenResponse.getCreditCardToken().getCreditCardTokenId());
+				log.info("");
+			}catch(Exception ex){
+				log.info(ex.toString());
+			}
+			//Acaba la peticion al servidor y se desgloso respuesta	
+			
+		} catch (Exception ex) {
+			log.info(ex.toString());
+		}
+	//Termina el conjunto de instrucciones
+	log.info("");
+}
+----
+
+Listo! Se ah reliazado una peticion al servidor y se ah recuperado la respuesta. Para terminar mostramos nuestro resultado final:
+
+[source,bash]
+----
+Peticion de tokenizar
+*******************************
+{"language": "es", "command": "CREATE_TOKEN", "merchant": {"apiLogin": "pRRXKOl8ikMmt9u", "apiKey": "4Vj8eK4rloUd272L48hsrarnUA"}, "creditCardToken": {"payerId": "10", "name": "full name", "identificationNumber": "32144457", "paymentMethod": "VISA", "number": "4111111111111111", "expirationDate": "2019/01"}}
+
+Respuesta de tokenizar
+*******************************
+{'code'=SUCCESS, 'error'=null, 'creditCardToken'={"creditCardTokenId": "454234b1-e40c-4a09-8531-9f1632c5dbbe", "name": "full name", "payerId": "10", "identificationNumber": "32144457", "paymentMethod": "VISA", "number": "null", "expirationDate": "null", "creationDate": "null", "maskedNumber": "411111******1111", "errorDescription": "null"}}
+
+Aqui tiene su token mi estimado: 
+********************************
+454234b1-e40c-4a09-8531-9f1632c5dbbe
+
+----

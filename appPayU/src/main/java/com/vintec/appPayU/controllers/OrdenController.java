@@ -9,77 +9,44 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vintec.appPayU.exceptions.ResourceNotFoundException;
 import com.vintec.appPayU.models.Orden;
-import com.vintec.appPayU.repositories.OrdenRepository;
-import com.vintec.appPayU.repositories.ProductoRepository;
-import com.vintec.appPayU.repositories.UsuarioRepository;
+import com.vintec.appPayU.services.OrdenService;
 
 
 @RestController
 public class OrdenController {
-
-	@Autowired
-	OrdenRepository ordenRepository;
 	
 	@Autowired
-	UsuarioRepository usuarioRepository;
-	
-	@Autowired
-	ProductoRepository productoRepository;
-	
+	OrdenService ordenService;
 	
 	@GetMapping("/ordenes_json")
 	public Iterable<Orden> getAllOrdenes() {
-      return ordenRepository.findAll();
+      return ordenService.obtenerOrdenes();
 	}
 	
 	@GetMapping("/ordenes/{ordenId}")
 	public Orden searchOrden(@PathVariable (value = "ordenId") Long ordenId){
-		return ordenRepository.findById(ordenId).get();
+		return ordenService.buscarOrden(ordenId);
 	}
 	
 	@GetMapping("/usuarios/{usuarioId}/ordenes_json")
     public Iterable<Orden> getAllOrdenesByUsuarioId(@PathVariable (value = "usuarioId") Long usuarioId) {
-        return ordenRepository.findByUsuarioId(usuarioId);
+        return ordenService.obtenerOrdenesPorUsuarioId(usuarioId);
     }
 	
 	@PostMapping("/usuarios/{usuarioId}/ordenes")
     public Orden createOrden(@PathVariable (value = "usuarioId") Long usuarioId, @ModelAttribute Orden orden) {
-        usuarioRepository.findById(usuarioId).ifPresent(usuario -> {
-            orden.setUsuario(usuario);
-        });
-        return ordenRepository.save(orden);
+        return ordenService.guardarOrden(usuarioId, orden);
     }
 	
-	@PutMapping("/usuarios/{usuarioId}/ordenes/{ordenId}")
-    public Orden updateOrden(@PathVariable (value = "usuarioId") Long usuarioId,
-                                 @PathVariable (value = "ordenId") Long ordenId,
-                                 @ModelAttribute Orden ordenRequest) {
-        if(!usuarioRepository.existsById(usuarioId)) {
-            throw new ResourceNotFoundException("UsuarioId " + usuarioId + " no encontrado");
-        }
-        else {
-	        ordenRepository.findById(ordenId).ifPresent(orden -> {
-	            orden.setReferencia(ordenRequest.getReferencia());
-	            orden.setFirma(ordenRequest.getFirma());
-	            orden.setTotal(ordenRequest.getTotal());
-	            ordenRepository.save(orden);
-	        });
-        }
-        return ordenRepository.findById(ordenId).get();
+	@PutMapping("/ordenes/{ordenId}")
+    public Orden updateOrden(@PathVariable (value = "ordenId") Long ordenId, @ModelAttribute Orden ordenRequest) {
+        return ordenService.actualizarOrden(ordenId, ordenRequest);
     }
 	
-	@DeleteMapping("/usuarios/{usuarioId}/ordenes/{ordenId}")
-    public String deleteOrden(@PathVariable (value = "usuarioId") Long usuarioId,
-                              @PathVariable (value = "ordenId") Long ordenId) {
-        if(!usuarioRepository.existsById(usuarioId)) {
-            throw new ResourceNotFoundException("UsuarioId " + usuarioId + " no encontrado");
-        }
-
-        ordenRepository.findById(ordenId).ifPresent(orden -> {
-             ordenRepository.delete(orden);
-        });
+	@DeleteMapping("/ordenes/{ordenId}")
+    public String deleteOrden(@PathVariable (value = "ordenId") Long ordenId) {
+		ordenService.borrarOrden(ordenId);
         return "Borrado completado con exito!";
     }
 
